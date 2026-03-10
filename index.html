@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuezPro — Dashboard</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- SheetJS para exportar Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🌰 NuezPro</div>
+      <div class="logo-sub">Sistema de Rentabilidad</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+
+      <div class="nav-section-label">Módulos</div>
+      <a href="simulador.html" class="nav-item">
+        <span class="nav-icon">🧮</span> Simulador de Compra
+      </a>
+      <a href="calculadora-inversa.html" class="nav-item">
+        <span class="nav-icon">🔄</span> Calculadora Inversa
+      </a>
+      <a href="produccion.html" class="nav-item">
+        <span class="nav-icon">🏭</span> Registro de Producción
+      </a>
+      <a href="proveedores.html" class="nav-item">
+        <span class="nav-icon">👥</span> Comparador de Proveedores
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version">v1.0.0 — Mendoza</div>
+    </div>
+  </aside>
+
+  <!-- ── Contenido principal ─────────────────────── -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="flex-center gap-8">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title">Dashboard Principal</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-date" id="topbar-date"></span>
+        <button class="btn btn-secondary btn-sm" id="btn-export-excel">📥 Exportar Excel</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Resumen de Operaciones</h1>
+        <p>Visión general de rentabilidad, producción y compras de nuez</p>
+      </div>
+
+      <!-- ── KPIs principales ──────────────────────── -->
+      <div class="grid-4 mb-24" id="kpis-container">
+        <div class="metric-card accent">
+          <div class="metric-label">Lotes registrados</div>
+          <div class="metric-value large" id="kpi-total-lotes">—</div>
+          <div class="metric-sub">Total histórico</div>
+        </div>
+        <div class="metric-card green">
+          <div class="metric-label">Rendimiento prom.</div>
+          <div class="metric-value large" id="kpi-rend-prom">—</div>
+          <div class="metric-sub">Promedio de todos los lotes</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Costo real prom. $/kg</div>
+          <div class="metric-value large" id="kpi-costo-kg">—</div>
+          <div class="metric-sub">Por kg de nuez limpia</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Precio prom. venta</div>
+          <div class="metric-value large" id="kpi-precio-venta">—</div>
+          <div class="metric-sub">Promedio ponderado</div>
+        </div>
+      </div>
+
+      <!-- ── Simulador rápido ──────────────────────── -->
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⚡ Simulador Rápido</span>
+            <a href="simulador.html" class="btn btn-ghost btn-sm">Simulador completo →</a>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr">
+            <div class="form-group">
+              <label>Kg con cáscara</label>
+              <div class="input-wrapper suffix">
+                <input type="number" id="sq-kg" placeholder="ej: 5000">
+                <span class="input-suffix">kg</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Precio $/kg</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="sq-precio" placeholder="ej: 1200">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Rendimiento %</label>
+              <div class="input-wrapper suffix">
+                <input type="number" id="sq-rend" placeholder="ej: 40">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Precio venta prom. $/kg</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="sq-pventa" placeholder="ej: 4500">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full mt-16" id="btn-sim-rapido">
+            🧮 Calcular rentabilidad estimada
+          </button>
+
+          <!-- Resultado rápido -->
+          <div id="sq-resultado" class="hidden mt-16">
+            <hr class="divider">
+            <div class="grid-2">
+              <div>
+                <div class="metric-label">Facturación estimada</div>
+                <div class="text-mono fw-bold text-accent" id="sq-facturacion" style="font-size:20px">—</div>
+              </div>
+              <div>
+                <div class="metric-label">Margen estimado</div>
+                <div class="text-mono fw-bold" id="sq-margen" style="font-size:20px">—</div>
+              </div>
+            </div>
+            <div id="sq-alert" class="rentabilidad-alert mt-16"></div>
+          </div>
+        </div>
+
+        <!-- Gráfico rentabilidad histórica -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📈 Rentabilidad por Lote</span>
+          </div>
+          <div class="chart-container" style="height:220px">
+            <canvas id="chart-dash-rentabilidad"></canvas>
+          </div>
+          <div id="no-lotes-msg" class="empty-state" style="padding:24px">
+            <div class="empty-state-icon">📦</div>
+            <p>Registrá lotes de producción para ver el historial.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Últimos lotes ─────────────────────────── -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title">📦 Últimos Lotes Registrados</span>
+          <a href="produccion.html" class="btn btn-ghost btn-sm">Ver todos →</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Lote</th>
+                <th>Proveedor</th>
+                <th>Fecha</th>
+                <th>Kg procesados</th>
+                <th>Rendimiento</th>
+                <th>Eficiencia</th>
+                <th>Facturación</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-ultimos-lotes">
+              <tr>
+                <td colspan="8" class="text-center text-muted" style="padding:24px">
+                  Cargando datos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Top proveedores ───────────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🏆 Ranking de Proveedores</span>
+          <a href="proveedores.html" class="btn btn-ghost btn-sm">Ver comparador →</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Proveedor</th>
+                <th>Lotes</th>
+                <th>Rend. prom.</th>
+                <th>Precio pagado prom.</th>
+                <th>Costo real prom.</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-top-proveedores">
+              <tr>
+                <td colspan="6" class="text-center text-muted" style="padding:24px">Cargando...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Scripts -->
+<script type="module">
+  import { initChartDefaults, crearGraficoRentabilidad } from "./js/charts.js";
+  import { obtenerLotes, obtenerProveedores }             from "./js/db.js";
+  import { exportarExcel }                               from "./js/export.js";
+  import {
+    formatCurrency, formatPct, formatKg, formatNum, showToast
+  } from "./js/utils.js";
+
+  // ── Fecha en topbar ──────────────────────────────
+  document.getElementById("topbar-date").textContent =
+    new Date().toLocaleDateString("es-AR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+
+  initChartDefaults();
+
+  // ── Cargar KPIs y tablas ─────────────────────────
+  async function cargarDashboard() {
+    try {
+      const [lotes, proveedores] = await Promise.all([obtenerLotes(), obtenerProveedores()]);
+
+      // KPIs
+      document.getElementById("kpi-total-lotes").textContent = lotes.length;
+
+      if (lotes.length) {
+        const rendProm    = lotes.reduce((a, l) => a + (l.rendimientoReal || 0), 0) / lotes.length;
+        const costoProm   = lotes.reduce((a, l) => a + (l.costoRealKgLimpio || 0), 0) / lotes.length;
+        const precioVProm = lotes.reduce((a, l) => a + (l.precioPpond || 0), 0) / lotes.length;
+
+        document.getElementById("kpi-rend-prom").textContent  = formatPct(rendProm);
+        document.getElementById("kpi-costo-kg").textContent   = formatCurrency(costoProm);
+        document.getElementById("kpi-precio-venta").textContent = formatCurrency(precioVProm);
+
+        // Gráfico rentabilidad
+        document.getElementById("no-lotes-msg").classList.add("hidden");
+        crearGraficoRentabilidad("chart-dash-rentabilidad", lotes.slice(0, 12).reverse());
+      }
+
+      // Tabla últimos lotes
+      const tbody = document.getElementById("tbody-ultimos-lotes");
+      if (lotes.length) {
+        tbody.innerHTML = lotes.slice(0, 8).map(l => `
+          <tr>
+            <td class="mono text-accent">${l.numeroLote || l.id?.substring(0,8)}</td>
+            <td>${l.proveedor || "—"}</td>
+            <td class="text-muted text-xs">${l.fecha || "—"}</td>
+            <td class="mono">${formatKg(l.kgProcesados)}</td>
+            <td class="mono ${l.rendimientoReal >= 40 ? 'text-green' : 'text-yellow'}">
+              ${formatPct(l.rendimientoReal)}
+            </td>
+            <td class="mono ${l.eficiencia >= 80 ? 'text-green' : l.eficiencia >= 50 ? 'text-yellow' : 'text-red'}">
+              ${formatPct(l.eficiencia)}
+            </td>
+            <td class="mono text-accent">${formatCurrency(l.facturacionTotal)}</td>
+            <td>
+              <span class="badge badge-${l.estado === 'excelente' ? 'green' : l.estado === 'aceptable' ? 'yellow' : 'red'}">
+                ${l.estado || '—'}
+              </span>
+            </td>
+          </tr>
+        `).join("");
+      } else {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:24px">
+          No hay lotes registrados. <a href="produccion.html" style="color:var(--accent)">Registrá el primero →</a>
+        </td></tr>`;
+      }
+
+      // Tabla top proveedores
+      const tbodyProv = document.getElementById("tbody-top-proveedores");
+      const provOrdenados = [...proveedores].sort((a,b) =>
+        (b.rendimientoPromedio||0) - (a.rendimientoPromedio||0)
+      );
+
+      if (provOrdenados.length) {
+        tbodyProv.innerHTML = provOrdenados.slice(0,5).map((p, i) => `
+          <tr>
+            <td><span class="provider-rank ${i===0?'rank-1':i===1?'rank-2':'rank-3'}">${i+1}</span></td>
+            <td><strong>${p.nombre || p.id}</strong></td>
+            <td class="mono text-center">${p.totalLotes || 0}</td>
+            <td class="mono text-center ${(p.rendimientoPromedio||0) >= 40 ? 'text-green' : 'text-yellow'}">
+              ${formatPct(p.rendimientoPromedio)}
+            </td>
+            <td class="mono text-center">${formatCurrency(p.precioPagadoProm)}</td>
+            <td class="mono text-center">${formatCurrency(p.costoRealProm)}</td>
+          </tr>
+        `).join("");
+      } else {
+        tbodyProv.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:24px">
+          Sin datos de proveedores aún.
+        </td></tr>`;
+      }
+
+    } catch (err) {
+      console.error("Error cargando dashboard:", err);
+      showToast("Error al cargar datos. Verificá la conexión a Firebase.", "error");
+    }
+  }
+
+  cargarDashboard();
+
+  // ── Simulador rápido ─────────────────────────────
+  document.getElementById("btn-sim-rapido").addEventListener("click", () => {
+    const kg     = parseFloat(document.getElementById("sq-kg").value) || 0;
+    const precio = parseFloat(document.getElementById("sq-precio").value) || 0;
+    const rend   = parseFloat(document.getElementById("sq-rend").value) || 0;
+    const pventa = parseFloat(document.getElementById("sq-pventa").value) || 0;
+
+    if (!kg || !precio || !rend || !pventa) {
+      showToast("Completá todos los campos del simulador rápido.", "error");
+      return;
+    }
+
+    const kgLimpio       = kg * (rend / 100);
+    const facturacion    = kgLimpio * pventa;
+    const costoMP        = kg * precio;
+    const ganancia       = facturacion - costoMP;
+    const margen         = facturacion > 0 ? (ganancia / facturacion) * 100 : 0;
+    const estado         = margen >= 25 ? "excelente" : margen >= 10 ? "aceptable" : "no-rentable";
+
+    document.getElementById("sq-resultado").classList.remove("hidden");
+    document.getElementById("sq-facturacion").textContent = formatCurrency(facturacion);
+    document.getElementById("sq-margen").textContent = formatPct(margen);
+
+    const configs = {
+      "excelente":   { icon:"🟢", title:"¡COMPRA EXCELENTE!", cls:"excelente" },
+      "aceptable":   { icon:"🟡", title:"COMPRA ACEPTABLE",   cls:"aceptable" },
+      "no-rentable": { icon:"🔴", title:"NO RENTABLE",        cls:"no-rentable" }
+    };
+    const c = configs[estado];
+    const alertEl = document.getElementById("sq-alert");
+    alertEl.className = `rentabilidad-alert ${c.cls}`;
+    alertEl.innerHTML = `
+      <span class="alert-icon">${c.icon}</span>
+      <div>
+        <div class="alert-title">${c.title}</div>
+        <div class="alert-desc">Ganancia estimada: ${formatCurrency(ganancia)} — Margen: ${formatPct(margen)}</div>
+      </div>
+    `;
+  });
+
+  // ── Exportar Excel ───────────────────────────────
+  document.getElementById("btn-export-excel").addEventListener("click", async () => {
+    try {
+      showToast("Generando Excel...", "info");
+      await exportarExcel();
+      showToast("Excel exportado correctamente.", "success");
+    } catch (err) {
+      showToast("Error al exportar.", "error");
+    }
+  });
+</script>
+
+</body>
+</html>

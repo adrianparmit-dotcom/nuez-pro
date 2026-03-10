@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuezPro — Simulador de Compra</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🌰 NuezPro</div>
+      <div class="logo-sub">Sistema de Rentabilidad</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+      <div class="nav-section-label">Módulos</div>
+      <a href="simulador.html" class="nav-item active"><span class="nav-icon">🧮</span> Simulador de Compra</a>
+      <a href="calculadora-inversa.html" class="nav-item"><span class="nav-icon">🔄</span> Calculadora Inversa</a>
+      <a href="produccion.html" class="nav-item"><span class="nav-icon">🏭</span> Registro de Producción</a>
+      <a href="proveedores.html" class="nav-item"><span class="nav-icon">👥</span> Comparador de Proveedores</a>
+    </nav>
+    <div class="sidebar-footer"><div class="version">v1.0.0 — Mendoza</div></div>
+  </aside>
+
+  <!-- ── Contenido ───────────────────────────────── -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="flex-center gap-8">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title">🧮 Simulador de Compra</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" id="btn-limpiar">🗑 Limpiar</button>
+        <button class="btn btn-secondary btn-sm" id="btn-guardar">💾 Guardar simulación</button>
+        <button class="btn btn-primary btn-sm" id="btn-calcular">▶ Calcular</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Simulador de Compra de Nuez</h1>
+        <p>Evaluá la rentabilidad de un lote antes de cerrar la compra con el proveedor en Mendoza</p>
+      </div>
+
+      <!-- Stepper visual -->
+      <div class="stepper">
+        <div class="step active"><div class="step-number">1</div><div class="step-label">Compra</div></div>
+        <div class="step-connector"></div>
+        <div class="step"><div class="step-number">2</div><div class="step-label">Rendimiento</div></div>
+        <div class="step-connector"></div>
+        <div class="step"><div class="step-number">3</div><div class="step-label">Precios</div></div>
+        <div class="step-connector"></div>
+        <div class="step"><div class="step-number">4</div><div class="step-label">Resultado</div></div>
+      </div>
+
+      <div id="simulador-form">
+        <!-- ── PASO 1: Compra de materia prima ──── -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title-lg">📦 Paso 1 — Compra de Materia Prima</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">💰 Materia prima</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Kg de nuez con cáscara</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="kgCascara" min="0" step="1" placeholder="ej: 5000">
+                  <span class="input-suffix">kg</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Precio por kg con cáscara</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="precioCascara" min="0" step="0.01" placeholder="ej: 1200">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Costo de transporte desde Mendoza</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="transporte" min="0" step="1" placeholder="ej: 45000">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">👷 Costos operativos</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Sueldos mensuales totales del equipo</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="sueldos" min="0" placeholder="ej: 800000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Cantidad de operarios por turno</label>
+                <input type="number" id="operarios" min="1" step="1" placeholder="ej: 4">
+              </div>
+              <div class="form-group">
+                <label>Horas de trabajo por día</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="horasDiarias" min="1" max="24" step="0.5" placeholder="ej: 8">
+                  <span class="input-suffix">hs</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Cuota mensual de la máquina</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="cuotaMaquina" min="0" placeholder="ej: 120000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Días de producción por mes</label>
+                <input type="number" id="diasMes" min="1" max="31" step="1" placeholder="ej: 22">
+              </div>
+              <div class="form-group">
+                <label>Capacidad de la máquina (kg/día)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="kgMaquinaDia" min="0" placeholder="ej: 2000">
+                  <span class="input-suffix">kg</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">📦 Packaging y logística</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Precio bolsa (5 kg)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="precioBolsa" min="0" step="0.01" placeholder="ej: 85">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Precio caja (10 kg)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="precioCaja" min="0" step="0.01" placeholder="ej: 140">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Costo de envío promedio a clientes</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="costoEnvio" min="0" placeholder="ej: 2500">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PASO 2: Rendimiento y variedades ─── -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title-lg">⚙️ Paso 2 — Rendimiento del Lote</span>
+            <span class="text-muted text-xs">
+              Kg limpio estimado: <strong id="display-kg-limpio" class="text-accent">—</strong>
+            </span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">📊 Rendimiento total</div>
+            <div class="form-grid" style="grid-template-columns: 280px 1fr">
+              <div class="form-group">
+                <label>Rendimiento total del lote</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="rendimientoPct" min="0" max="100" step="0.1" placeholder="ej: 40">
+                  <span class="input-suffix">%</span>
+                </div>
+                <span class="text-xs text-muted mt-4">
+                  kg limpio = kg cáscara × (rendimiento / 100)
+                </span>
+              </div>
+              <div style="padding-top: 20px; color: var(--text-muted); font-size: 12px; line-height: 1.8">
+                El rendimiento es el porcentaje de nuez limpia (pelada) que se obtiene del total de nuez con cáscara.
+                Un lote de calidad típicamente rinde entre 38% y 45%.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">🥜 Distribución de variedades
+              <span class="text-xs text-muted" style="font-weight:400; text-transform:none; letter-spacing:0">
+                (% sobre kg limpio total)
+              </span>
+            </div>
+
+            <!-- Indicador de suma de porcentajes -->
+            <div id="pct-total-indicator" class="pct-total-indicator under mb-8">
+              Σ porcentajes: 0.0%
+            </div>
+
+            <div class="table-wrapper">
+              <table class="variety-table">
+                <thead>
+                  <tr>
+                    <th>Variedad</th>
+                    <th>% del lote limpio</th>
+                    <th>Kg estimados</th>
+                    <th>Precio $/kg</th>
+                    <th>Facturación</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-variedades">
+                  <!-- Generado por JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón calcular central -->
+        <div class="text-center mb-20">
+          <button class="btn btn-primary btn-lg" id="btn-calcular-2">
+            ▶ Calcular rentabilidad del lote
+          </button>
+        </div>
+      </div><!-- /simulador-form -->
+
+      <!-- ── PASO 3: Resultados ─────────────────── -->
+      <div id="resultados-panel" class="hidden">
+
+        <!-- Alerta de rentabilidad -->
+        <div id="rentabilidad-alert" class="rentabilidad-alert mb-20">
+          <!-- Generado por JS -->
+        </div>
+
+        <!-- KPIs de resultado -->
+        <div class="grid-4 mb-20">
+          <div class="metric-card accent">
+            <div class="metric-label">Facturación total</div>
+            <div class="metric-value" id="res-facturacion">—</div>
+          </div>
+          <div class="metric-card" id="card-ganancia">
+            <div class="metric-label">Ganancia</div>
+            <div class="metric-value" id="res-ganancia">—</div>
+            <div class="metric-sub" id="res-margen">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Costo total del lote</div>
+            <div class="metric-value" id="res-costo-total">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Costo real $/kg limpio</div>
+            <div class="metric-value" id="res-costo-kg-limpio">—</div>
+          </div>
+        </div>
+
+        <div class="grid-2 mb-20">
+          <!-- Desglose de costos -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Desglose de costos</span>
+            </div>
+            <div class="cost-breakdown">
+              <div class="cost-row">
+                <span class="cost-label">📦 Compra materia prima</span>
+                <span class="cost-value" id="desg-compra-mp">—</span>
+              </div>
+              <div class="cost-row">
+                <span class="cost-label">🚛 Transporte compra</span>
+                <span class="cost-value" id="desg-transporte">—</span>
+              </div>
+              <div class="cost-row">
+                <span class="cost-label">👷 Producción (MO + máquina)</span>
+                <span class="cost-value" id="desg-produccion">—</span>
+              </div>
+              <div class="cost-row">
+                <span class="cost-label">📦 Packaging</span>
+                <span class="cost-value" id="desg-packaging">—</span>
+              </div>
+              <div class="cost-row">
+                <span class="cost-label">📫 Transporte ventas</span>
+                <span class="cost-value" id="desg-transp-venta">—</span>
+              </div>
+              <div class="cost-row total">
+                <span class="cost-label">💰 TOTAL</span>
+                <span class="cost-value" id="desg-total">—</span>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-16">
+              <div>
+                <div class="metric-label">Kg limpio producidos</div>
+                <div class="text-mono fw-bold text-accent" id="res-kg-limpio">—</div>
+              </div>
+              <div>
+                <div class="metric-label">Precio prom. ponderado</div>
+                <div class="text-mono fw-bold" id="res-precio-ppond">—</div>
+              </div>
+              <div>
+                <div class="metric-label">Horas estimadas de producción</div>
+                <div class="text-mono" id="res-horas-lote">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico variedades -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Distribución de variedades</span>
+            </div>
+            <div class="chart-container" style="height:200px">
+              <canvas id="chart-variedades"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico facturación -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title">Facturación por variedad</span>
+          </div>
+          <div class="chart-container" style="height:220px">
+            <canvas id="chart-facturacion"></canvas>
+          </div>
+        </div>
+
+        <!-- Botón guardar -->
+        <div class="flex-between">
+          <div class="text-muted text-sm">
+            Guardá esta simulación para consultarla después o comparar con la producción real.
+          </div>
+          <button class="btn btn-primary" id="btn-guardar-2">💾 Guardar simulación</button>
+        </div>
+      </div><!-- /resultados-panel -->
+
+      <!-- ── Historial ──────────────────────────── -->
+      <div class="card mt-24">
+        <div class="card-header">
+          <span class="card-title">📋 Historial de Simulaciones</span>
+          <button class="btn btn-ghost btn-sm" id="btn-export-sims">📥 Exportar CSV</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Kg cáscara</th>
+                <th>Precio $/kg</th>
+                <th>Rendim.</th>
+                <th>Facturación</th>
+                <th>Costo total</th>
+                <th>Margen</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-historial">
+              <tr><td colspan="9" class="text-center text-muted" style="padding:24px">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module">
+  import { initSimulador } from "./js/simulador.js";
+  import { initChartDefaults } from "./js/charts.js";
+  import { exportarSimulacionesCSV } from "./js/export.js";
+  import { showToast } from "./js/utils.js";
+
+  initChartDefaults();
+  initSimulador();
+
+  // Segundo botón calcular en el form
+  document.getElementById("btn-calcular-2")?.addEventListener("click", () => {
+    document.getElementById("btn-calcular").click();
+  });
+
+  // Segundo botón guardar en resultados
+  document.getElementById("btn-guardar-2")?.addEventListener("click", () => {
+    document.getElementById("btn-guardar").click();
+  });
+
+  // Exportar simulaciones CSV
+  document.getElementById("btn-export-sims")?.addEventListener("click", async () => {
+    try {
+      await exportarSimulacionesCSV();
+      showToast("CSV exportado.", "success");
+    } catch (e) {
+      showToast("Error al exportar.", "error");
+    }
+  });
+</script>
+
+</body>
+</html>

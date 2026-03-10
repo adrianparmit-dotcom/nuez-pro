@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuezPro — Comparador de Proveedores</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🌰 NuezPro</div>
+      <div class="logo-sub">Sistema de Rentabilidad</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+      <div class="nav-section-label">Módulos</div>
+      <a href="simulador.html" class="nav-item"><span class="nav-icon">🧮</span> Simulador de Compra</a>
+      <a href="calculadora-inversa.html" class="nav-item"><span class="nav-icon">🔄</span> Calculadora Inversa</a>
+      <a href="produccion.html" class="nav-item"><span class="nav-icon">🏭</span> Registro de Producción</a>
+      <a href="proveedores.html" class="nav-item active"><span class="nav-icon">👥</span> Comparador de Proveedores</a>
+    </nav>
+    <div class="sidebar-footer"><div class="version">v1.0.0 — Mendoza</div></div>
+  </aside>
+
+  <!-- ── Contenido ───────────────────────────────── -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="flex-center gap-8">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title">👥 Comparador de Proveedores</span>
+      </div>
+      <div class="topbar-right">
+        <div class="flex-center gap-8">
+          <input type="text" id="input-buscar-prov" placeholder="Buscar proveedor..."
+                 style="width:200px; padding:6px 12px; border-radius:4px; border:1px solid var(--border);
+                        background:var(--bg-input); color:var(--text-primary); font-size:13px; outline:none">
+          <button class="btn btn-ghost btn-sm" id="btn-ver-proveedor">Buscar</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Comparador de Proveedores</h1>
+        <p>Historial estadístico por proveedor. Se actualiza automáticamente al registrar nuevos lotes.</p>
+      </div>
+
+      <!-- ── KPIs resumen ──────────────────────────── -->
+      <div class="grid-4 mb-24">
+        <div class="metric-card">
+          <div class="metric-label">Total proveedores</div>
+          <div class="metric-value" id="stat-total-provs">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total lotes procesados</div>
+          <div class="metric-value" id="stat-total-lotes">—</div>
+        </div>
+        <div class="metric-card green">
+          <div class="metric-label">Mejor rendimiento</div>
+          <div class="metric-value text-sm" id="stat-mejor-rend">—</div>
+        </div>
+        <div class="metric-card accent">
+          <div class="metric-label">Mejor precio pagado</div>
+          <div class="metric-value text-sm" id="stat-mejor-precio">—</div>
+        </div>
+      </div>
+
+      <!-- ── Tabla principal ───────────────────────── -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title-lg">Ranking de Proveedores</span>
+          <span class="text-xs text-muted">Ordenado por rendimiento promedio ↓</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Proveedor</th>
+                <th style="text-align:center">Lotes</th>
+                <th style="text-align:center">Rendim. prom.</th>
+                <th style="text-align:center">% Mariposa prom.</th>
+                <th style="text-align:center">Precio pagado prom.</th>
+                <th style="text-align:center">Costo real prom. $/kg</th>
+                <th style="text-align:center">Última compra</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-proveedores">
+              <tr>
+                <td colspan="9" class="text-center text-muted" style="padding:48px">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p>Los proveedores aparecerán aquí automáticamente<br>
+                    cuando registres lotes de producción real.<br><br>
+                    <a href="produccion.html" style="color:var(--accent)">→ Registrar primer lote</a></p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Gráfico de comparación ─────────────────── -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title-lg">Comparación Gráfica</span>
+          <select id="select-campo-grafico"
+                  style="background:var(--bg-input); border:1px solid var(--border);
+                         color:var(--text-primary); border-radius:4px; padding:5px 10px;
+                         font-size:12px; outline:none; cursor:pointer">
+            <option value="rendimientoPromedio">Rendimiento promedio %</option>
+            <option value="pctMariposaProm">% Mariposa promedio</option>
+            <option value="precioPagadoProm">Precio pagado promedio $/kg</option>
+            <option value="costoRealProm">Costo real promedio $/kg limpio</option>
+            <option value="totalLotes">Total de lotes</option>
+          </select>
+        </div>
+        <div class="chart-container" style="height:300px">
+          <canvas id="chart-proveedores"></canvas>
+        </div>
+        <div id="no-provs-chart" class="empty-state hidden" style="padding:40px">
+          <div class="empty-state-icon">📊</div>
+          <p>Sin datos de proveedores para graficar.</p>
+        </div>
+      </div>
+
+      <!-- ── Guía de interpretación ─────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📖 Guía de Interpretación de Proveedores</span>
+        </div>
+
+        <div class="grid-3" style="gap:20px; padding:8px 0">
+          <div class="card" style="background:var(--green-dim); border-color:rgba(46,204,113,0.2)">
+            <div style="color:var(--green); font-weight:600; font-size:13px; margin-bottom:10px">
+              🟢 Proveedor Excelente
+            </div>
+            <ul style="font-size:12px; color:var(--text-secondary); line-height:2.2; list-style:none; padding:0">
+              <li>✓ Rendimiento ≥ 42%</li>
+              <li>✓ Mariposa ≥ 30%</li>
+              <li>✓ Precio competitivo</li>
+              <li>✓ Consistencia entre lotes</li>
+            </ul>
+          </div>
+          <div class="card" style="background:var(--yellow-dim); border-color:rgba(241,196,15,0.2)">
+            <div style="color:var(--yellow); font-weight:600; font-size:13px; margin-bottom:10px">
+              🟡 Proveedor Aceptable
+            </div>
+            <ul style="font-size:12px; color:var(--text-secondary); line-height:2.2; list-style:none; padding:0">
+              <li>~ Rendimiento 37–42%</li>
+              <li>~ Mariposa 20–30%</li>
+              <li>~ Precio promedio del mercado</li>
+              <li>~ Cierta variabilidad entre lotes</li>
+            </ul>
+          </div>
+          <div class="card" style="background:var(--red-dim); border-color:rgba(231,76,60,0.2)">
+            <div style="color:var(--red); font-weight:600; font-size:13px; margin-bottom:10px">
+              🔴 Revisar Relación
+            </div>
+            <ul style="font-size:12px; color:var(--text-secondary); line-height:2.2; list-style:none; padding:0">
+              <li>✗ Rendimiento &lt; 37%</li>
+              <li>✗ Poca mariposa (&lt; 20%)</li>
+              <li>✗ Precio alto vs calidad</li>
+              <li>✗ Alta variabilidad de lote a lote</li>
+            </ul>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="text-xs text-muted" style="line-height:1.9">
+          <strong class="text-secondary">¿Cómo se calculan los promedios?</strong><br>
+          Las estadísticas de cada proveedor se recalculan automáticamente cada vez que registrás un nuevo lote.
+          Los promedios incluyen <em>todos</em> los lotes históricos del proveedor sin excepción.<br><br>
+          <strong class="text-secondary">% Mariposa prom.</strong> = suma de Mariposa Extra Light + Light + Ámbar.<br>
+          <strong class="text-secondary">Costo real prom.</strong> = promedio del costo total del lote / kg limpio producido (solo precio de compra vs kg limpio).
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app-layout -->
+
+<!-- ── Modal detalle de proveedor ───────────────── -->
+<div class="modal-overlay" id="modal-proveedor">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <span class="modal-title">Detalle del proveedor</span>
+      <button class="modal-close"
+              onclick="document.getElementById('modal-proveedor').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Generado dinámicamente por proveedores.js -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost"
+              onclick="document.getElementById('modal-proveedor').classList.remove('open')">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script type="module">
+  import { initProveedores } from "./js/proveedores.js";
+  import { initChartDefaults } from "./js/charts.js";
+
+  initChartDefaults();
+  initProveedores();
+
+  // Cerrar modal al hacer clic en el overlay
+  document.getElementById("modal-proveedor")?.addEventListener("click", (e) => {
+    if (e.target.id === "modal-proveedor") {
+      e.target.classList.remove("open");
+    }
+  });
+
+  // Buscar con tecla Enter
+  document.getElementById("input-buscar-prov")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btn-ver-proveedor").click();
+  });
+</script>
+
+</body>
+</html>

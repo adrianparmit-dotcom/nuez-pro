@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuezPro — Registro de Producción</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🌰 NuezPro</div>
+      <div class="logo-sub">Sistema de Rentabilidad</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+      <div class="nav-section-label">Módulos</div>
+      <a href="simulador.html" class="nav-item"><span class="nav-icon">🧮</span> Simulador de Compra</a>
+      <a href="calculadora-inversa.html" class="nav-item"><span class="nav-icon">🔄</span> Calculadora Inversa</a>
+      <a href="produccion.html" class="nav-item active"><span class="nav-icon">🏭</span> Registro de Producción</a>
+      <a href="proveedores.html" class="nav-item"><span class="nav-icon">👥</span> Comparador de Proveedores</a>
+    </nav>
+    <div class="sidebar-footer"><div class="version">v1.0.0 — Mendoza</div></div>
+  </aside>
+
+  <!-- ── Contenido ───────────────────────────────── -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="flex-center gap-8">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title">🏭 Registro de Producción Real</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" id="btn-limpiar-prod">🗑 Limpiar</button>
+        <button class="btn btn-primary btn-sm" id="btn-registrar-lote">✅ Registrar lote</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Registro de Producción Real</h1>
+        <p>Documentá cada lote procesado para comparar con las simulaciones y analizar eficiencia</p>
+      </div>
+
+      <div id="prod-form">
+
+        <!-- ── Datos generales del lote ─────────── -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title-lg">📋 Datos Generales del Lote</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Número de lote interno</label>
+                <div class="flex-center gap-8">
+                  <input type="text" id="prod-numero-lote" placeholder="LOT-XXXXXX-XXXX" style="flex:1">
+                  <button class="btn btn-ghost btn-sm" id="btn-nuevo-lote-num" title="Generar nuevo número">🔄</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Proveedor</label>
+                <input type="text" id="prod-proveedor" placeholder="ej: Juan Pérez - Mendoza">
+              </div>
+              <div class="form-group">
+                <label>Fecha de procesamiento</label>
+                <input type="date" id="prod-fecha">
+              </div>
+              <div class="form-group">
+                <label>Precio pagado $/kg cáscara</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="prod-precio-cascara" min="0" step="0.01" placeholder="ej: 1200">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Producción y tiempos ──────────────── -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title-lg">⏱️ Tiempos y Producción</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Kg procesados (con cáscara)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="prod-kg-procesados" min="0" step="1" placeholder="ej: 5000">
+                  <span class="input-suffix">kg</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Hora de inicio</label>
+                <input type="time" id="prod-hora-inicio">
+              </div>
+              <div class="form-group">
+                <label>Hora de finalización</label>
+                <input type="time" id="prod-hora-fin">
+              </div>
+              <div class="form-group">
+                <label>Número de operarios</label>
+                <input type="number" id="prod-operarios" min="1" step="1" placeholder="ej: 4">
+              </div>
+              <div class="form-group">
+                <label>Tiempo muerto limpieza manual (min)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="prod-tiempo-muerto" min="0" step="1" placeholder="ej: 30">
+                  <span class="input-suffix">min</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Capacidad teórica máquina (kg/día)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="prod-cap-teorica" min="0" placeholder="ej: 2000">
+                  <span class="input-suffix">kg</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Horas por turno (referencia)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="prod-horas-turno" min="1" max="24" step="0.5" placeholder="ej: 8">
+                  <span class="input-suffix">hs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Métricas calculadas en vivo -->
+          <div class="grid-4 mt-16">
+            <div class="metric-card">
+              <div class="metric-label">Horas totales</div>
+              <div class="metric-value" id="display-horas-totales">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Horas efectivas</div>
+              <div class="metric-value" id="display-horas-efectivas">—</div>
+            </div>
+            <div class="metric-card accent">
+              <div class="metric-label">Kg / hora</div>
+              <div class="metric-value" id="display-kg-hora">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Eficiencia vs teórica</div>
+              <div class="metric-value" id="display-eficiencia">—</div>
+            </div>
+          </div>
+
+          <!-- Ring de eficiencia visual -->
+          <div class="efficiency-display mt-16">
+            <div class="efficiency-ring">
+              <svg viewBox="0 0 80 80">
+                <circle class="bg-circle" cx="40" cy="40" r="35"/>
+                <circle class="progress-circle" cx="40" cy="40" r="35"/>
+              </svg>
+              <div class="ring-text">—</div>
+            </div>
+            <div>
+              <div class="fw-bold">Eficiencia de producción</div>
+              <div class="text-xs text-muted mt-4">
+                Verde ≥ 80% | Amarillo ≥ 50% | Rojo &lt; 50%<br>
+                Comparado con capacidad teórica de la máquina
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Frenadas de máquina ───────────────── -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title-lg">🔴 Frenadas de Máquina</span>
+            <button class="btn btn-secondary btn-sm" id="btn-agregar-frenada">+ Agregar frenada</button>
+          </div>
+          <p class="text-xs text-muted mb-16">
+            Registrá cada parada no planificada de la máquina para análisis posterior
+          </p>
+          <div id="frenadas-container">
+            <!-- Frenadas dinámicas -->
+          </div>
+          <div id="no-frenadas-msg" class="text-xs text-muted" style="font-style: italic">
+            Sin frenadas registradas. Usá el botón "Agregar frenada" si hubo paradas.
+          </div>
+        </div>
+
+        <!-- ── Rendimiento y variedades reales ──── -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <span class="card-title-lg">🥜 Rendimiento Real y Variedades</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">📊 Rendimiento real obtenido</div>
+            <div class="form-grid" style="grid-template-columns: 280px 1fr">
+              <div class="form-group">
+                <label>Rendimiento real del lote (%)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="prod-rendimiento-real" min="0" max="100" step="0.1"
+                         placeholder="ej: 41.5">
+                  <span class="input-suffix">%</span>
+                </div>
+              </div>
+              <div style="padding-top: 20px; color: var(--text-muted); font-size: 12px">
+                Pesá la nuez pelada obtenida y dividí por los kg de nuez con cáscara procesada.
+                Ej: 2.075 kg limpios / 5.000 kg cáscara = 41.5%
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">🏷️ Distribución real de variedades</div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Variedad</th>
+                    <th>% real</th>
+                    <th>Kg obtenidos</th>
+                    <th>Precio $/kg</th>
+                    <th>Facturación</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-variedades-prod">
+                  <!-- Generado por JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón registrar -->
+        <div class="text-center mb-20">
+          <button class="btn btn-primary btn-lg" id="btn-registrar-lote-2">
+            ✅ Registrar lote en el sistema
+          </button>
+        </div>
+
+      </div><!-- /prod-form -->
+
+      <!-- ── Resumen del lote registrado ──────────── -->
+      <div id="resumen-lote" class="card hidden mb-20">
+        <!-- Generado por JS -->
+      </div>
+
+      <!-- ── Historial de lotes ─────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📦 Historial de Lotes Registrados</span>
+          <button class="btn btn-ghost btn-sm" id="btn-export-lotes">📥 Exportar CSV</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Lote</th>
+                <th>Proveedor</th>
+                <th>Fecha</th>
+                <th>Kg procesados</th>
+                <th>Rendim. real</th>
+                <th>Kg/hora</th>
+                <th>Eficiencia</th>
+                <th>Facturación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-historial-lotes">
+              <tr><td colspan="9" class="text-center text-muted" style="padding:24px">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal detalle de lote -->
+<div class="modal-overlay" id="modal-lote">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Detalle del lote</span>
+      <button class="modal-close" onclick="document.getElementById('modal-lote').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Generado por JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-lote').classList.remove('open')">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module">
+  import { initProduccion } from "./js/produccion.js";
+  import { initChartDefaults } from "./js/charts.js";
+  import { exportarCSV } from "./js/export.js";
+  import { showToast } from "./js/utils.js";
+
+  initChartDefaults();
+  initProduccion();
+
+  // Segundo botón de registro en el form
+  document.getElementById("btn-registrar-lote-2")?.addEventListener("click", () => {
+    document.getElementById("btn-registrar-lote").click();
+  });
+
+  // Cerrar modal clickeando overlay
+  document.getElementById("modal-lote")?.addEventListener("click", (e) => {
+    if (e.target.id === "modal-lote") e.target.classList.remove("open");
+  });
+
+  // Exportar lotes CSV
+  document.getElementById("btn-export-lotes")?.addEventListener("click", async () => {
+    try {
+      await exportarCSV();
+      showToast("CSV exportado.", "success");
+    } catch (e) {
+      showToast("Error al exportar.", "error");
+    }
+  });
+
+  // Ocultar msg "sin frenadas" cuando hay al menos una
+  document.getElementById("btn-agregar-frenada")?.addEventListener("click", () => {
+    document.getElementById("no-frenadas-msg")?.classList.add("hidden");
+  });
+
+  // Establecer fecha de hoy por defecto
+  const hoy = new Date().toISOString().split("T")[0];
+  const fechaEl = document.getElementById("prod-fecha");
+  if (fechaEl && !fechaEl.value) fechaEl.value = hoy;
+</script>
+
+</body>
+</html>

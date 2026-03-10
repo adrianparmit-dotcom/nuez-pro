@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuezPro — Calculadora Inversa</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🌰 NuezPro</div>
+      <div class="logo-sub">Sistema de Rentabilidad</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+      <div class="nav-section-label">Módulos</div>
+      <a href="simulador.html" class="nav-item"><span class="nav-icon">🧮</span> Simulador de Compra</a>
+      <a href="calculadora-inversa.html" class="nav-item active"><span class="nav-icon">🔄</span> Calculadora Inversa</a>
+      <a href="produccion.html" class="nav-item"><span class="nav-icon">🏭</span> Registro de Producción</a>
+      <a href="proveedores.html" class="nav-item"><span class="nav-icon">👥</span> Comparador de Proveedores</a>
+    </nav>
+    <div class="sidebar-footer"><div class="version">v1.0.0 — Mendoza</div></div>
+  </aside>
+
+  <!-- ── Contenido ───────────────────────────────── -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="flex-center gap-8">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title">🔄 Calculadora Inversa</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1>Calculadora Inversa de Precio</h1>
+        <p>¿Cuánto podés pagar como máximo por kg de nuez con cáscara para lograr el margen deseado?</p>
+      </div>
+
+      <div class="grid-2">
+
+        <!-- ── Formulario de entrada ─────────────── -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title-lg">Parámetros del negocio</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">🎯 Objetivos de venta</div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr">
+              <div class="form-group">
+                <label>Precio de venta prom. esperado ($/kg limpio)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="precio-venta-prom" min="0" step="0.01"
+                         placeholder="ej: 4500">
+                </div>
+                <span class="text-xs text-muted mt-4">
+                  Precio promedio ponderado que esperás obtener
+                </span>
+              </div>
+              <div class="form-group">
+                <label>Margen deseado (%)</label>
+                <div class="input-wrapper suffix">
+                  <input type="number" id="margen-deseado" min="1" max="99" step="0.5"
+                         placeholder="ej: 25">
+                  <span class="input-suffix">%</span>
+                </div>
+                <span class="text-xs text-muted mt-4">
+                  Verde ≥25% | Amarillo ≥10% | Rojo &lt;10%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">⚙️ Parámetros del lote</div>
+            <div class="form-group" style="max-width: 280px">
+              <label>Rendimiento estimado del lote (%)</label>
+              <div class="input-wrapper suffix">
+                <input type="number" id="rendimiento-calc" min="1" max="100" step="0.5"
+                       placeholder="ej: 40">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">💸 Costos operativos (por kg limpio)</div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr">
+              <div class="form-group">
+                <label>Transporte ($/kg limpio)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="costo-transporte-calc" min="0" step="0.01" placeholder="ej: 80">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Producción ($/kg limpio)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="costo-produccion-calc" min="0" step="0.01" placeholder="ej: 150">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Packaging ($/kg limpio)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="costo-packaging-calc" min="0" step="0.01" placeholder="ej: 40">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Otros costos ($/kg limpio)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" id="costo-otros-calc" min="0" step="0.01" placeholder="ej: 30">
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-16" style="background: var(--bg-input); border-style: dashed; padding: 12px">
+              <div class="text-xs text-muted">
+                💡 <strong>¿Cómo calcular los costos por kg limpio?</strong><br>
+                Tomá el costo total del mes y dividilo por los kg limpios producidos en el mes.
+                Por ejemplo: si el transporte del mes cuesta $200.000 y producís 2.500 kg limpios → $80/kg.
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full btn-lg" id="btn-calcular-inv">
+            🔄 Calcular precio máximo
+          </button>
+        </div>
+
+        <!-- ── Panel de resultado ─────────────────── -->
+        <div>
+          <!-- Resultado principal -->
+          <div class="card mb-20" id="resultado-inverso" style="display: block">
+            <div class="card-header">
+              <span class="card-title-lg">Resultado</span>
+            </div>
+
+            <!-- Número grande -->
+            <div class="calc-inversa-result">
+              <div class="big-number" id="precio-maximo-display">—</div>
+              <div class="big-label">Precio máximo por kg con cáscara</div>
+            </div>
+
+            <!-- Alerta semáforo -->
+            <div id="semaforo-inverso" class="rentabilidad-alert aceptable mt-16">
+              <span class="alert-icon">⏳</span>
+              <div>
+                <div class="alert-title">Completá los datos para calcular</div>
+                <div class="alert-desc">Ingresá precio de venta, margen y rendimiento</div>
+              </div>
+            </div>
+
+            <!-- Desglose por kg de cáscara -->
+            <hr class="divider">
+            <div class="card-title mb-8">Desglose por kg de nuez con cáscara</div>
+            <div class="cost-breakdown">
+              <div class="cost-row">
+                <span class="cost-label">Facturación por kg cáscara</span>
+                <span class="cost-value" id="inv-facturacion-kg">—</span>
+              </div>
+              <div class="cost-row">
+                <span class="cost-label">Costos operativos por kg cáscara</span>
+                <span class="cost-value" id="inv-costo-op-kg">—</span>
+              </div>
+              <div class="cost-row total">
+                <span class="cost-label">Costo total permitido por kg cáscara</span>
+                <span class="cost-value" id="inv-costo-total-kg">—</span>
+              </div>
+            </div>
+
+            <hr class="divider">
+            <div class="flex-between">
+              <div class="metric-label">Ganancia por kg limpio</div>
+              <div class="text-mono text-green fw-bold" id="inv-ganancia-kg">—</div>
+            </div>
+          </div>
+
+          <!-- Tabla de escenarios por rendimiento -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Escenarios por rendimiento</span>
+            </div>
+            <p class="text-xs text-muted mb-8">
+              Precio máximo según diferentes rendimientos (manteniendo mismo margen y costos)
+            </p>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rendimiento</th>
+                    <th>Facturación/kg cáscara</th>
+                    <th>Precio máx.</th>
+                    <th>Viabilidad</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-escenarios">
+                  <tr>
+                    <td colspan="4" class="text-center text-muted" style="padding:20px">
+                      Calculá para ver escenarios
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /grid-2 -->
+
+      <!-- ── Referencia rápida ───────────────────── -->
+      <div class="card mt-24">
+        <div class="card-header">
+          <span class="card-title">📖 Referencia Rápida — Fórmula de Cálculo</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; padding: 8px 0">
+          <div>
+            <div class="text-xs text-muted fw-bold mb-8 text-accent" style="text-transform:uppercase; letter-spacing:1px">
+              Paso 1 — Facturación
+            </div>
+            <div class="card" style="background: var(--bg-input); padding: 12px">
+              <code style="font-size: 12px; color: var(--text-secondary)">
+                Facturación/kg cáscara =<br>
+                Precio venta × (rendimiento / 100)
+              </code>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs text-muted fw-bold mb-8 text-accent" style="text-transform:uppercase; letter-spacing:1px">
+              Paso 2 — Costo permitido
+            </div>
+            <div class="card" style="background: var(--bg-input); padding: 12px">
+              <code style="font-size: 12px; color: var(--text-secondary)">
+                Costo permitido =<br>
+                Facturación × (1 - margen/100)
+              </code>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs text-muted fw-bold mb-8 text-accent" style="text-transform:uppercase; letter-spacing:1px">
+              Paso 3 — Precio máximo
+            </div>
+            <div class="card" style="background: var(--bg-input); padding: 12px">
+              <code style="font-size: 12px; color: var(--text-secondary)">
+                Precio máx. =<br>
+                Costo permitido - costos op.
+              </code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module">
+  import { initCalculadora } from "./js/calculadora.js";
+  initCalculadora();
+</script>
+
+</body>
+</html>

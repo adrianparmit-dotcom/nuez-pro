@@ -1397,6 +1397,9 @@ tfoot td {
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Firebase SDK compat (carga global) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -1604,26 +1607,10 @@ tfoot td {
 <!-- Toast container -->
 <div id="toast-container"></div>
 
-<script type="module">
+<script>
+
 
 // ========== firebase-config.js ==========
-// ============================================================
-// firebase-config.js — Configuración de Firebase
-// ⚠️  REEMPLAZAR con las credenciales de tu proyecto Firebase
-// ============================================================
-
-// Importar Firebase (CDN modular v9+)
-// import { initializeApp 
-// import { getFirestore 
-
-/**
- * Configuración del proyecto Firebase.
- * Para obtener estos valores:
- * 1. Ir a https://console.firebase.google.com
- * 2. Crear proyecto (o usar uno existente)
- * 3. Configuración del proyecto → Agregar app web
- * 4. Copiar el objeto firebaseConfig
- */
 const firebaseConfig = {
   apiKey:            "AIzaSyA4Ck2SIyuCvSHVR7PaJsLdAnsNCids8RM",
   authDomain:        "nuez-pro.firebaseapp.com",
@@ -1634,20 +1621,17 @@ const firebaseConfig = {
   appId:             "1:439083026648:web:517dcb1c8725e67f40efad"
 };
 
-// Inicializar app Firebase
-const app = initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
 
-// Exportar instancia de Firestore
-const db = getFirestore(app);
-
-// Nombres de colecciones
 const COLLECTIONS = {
-  SIMULACIONES: "simulaciones",   // Simulaciones de compra guardadas
-  LOTES:        "lotes",          // Producción real registrada
-  PROVEEDORES:  "proveedores",    // Resumen histórico por proveedor
-  CONFIG:       "config"          // Parámetros globales (precios base, etc.)
+  SIMULACIONES: "simulaciones",
+  LOTES:        "lotes",
+  PROVEEDORES:  "proveedores",
+  CONFIG:       "config"
 };
-
 
 // ========== utils.js ==========
 // ============================================================
@@ -2025,153 +2009,69 @@ const COLORES_VARIEDAD = {
 };
 
 
+
 // ========== db.js ==========
-// ============================================================
-// db.js — Capa de acceso a datos (Firestore)
-// Centraliza todas las operaciones de lectura/escritura
-// ============================================================
-
-// import {
-  collection, doc, addDoc, setDoc, getDoc,
-  getDocs, updateDoc, deleteDoc,
-  query, where, orderBy, limit,
-  onSnapshot, serverTimestamp
-
-
-// import { db, COLLECTIONS 
-
-// ── Helpers internos ─────────────────────────────────────
-
-/** Convierte un documento Firestore en objeto JS con id incluido */
 const docToObj = (doc) => ({ id: doc.id, ...doc.data() });
+const snapshotToArray = (snapshot) => {
+  const arr = [];
+  snapshot.forEach(d => arr.push(docToObj(d)));
+  return arr;
+};
 
-/** Convierte QuerySnapshot en array de objetos */
-const snapshotToArray = (snapshot) => snapshot.docs.map(docToObj);
-
-
-// ── SIMULACIONES ─────────────────────────────────────────
-
-/**
- * Guarda una simulación en Firestore.
- * @param {Object} simulacion - Datos completos de la simulación
- * @returns {string} ID del documento creado
- */
 async function guardarSimulacion(simulacion) {
-  const ref = await addDoc(collection(db, COLLECTIONS.SIMULACIONES), {
+  const ref = await db.collection(COLLECTIONS.SIMULACIONES).add({
     ...simulacion,
-    creadoEn: serverTimestamp()
+    creadoEn: firebase.firestore.FieldValue.serverTimestamp()
   });
   return ref.id;
 }
 
-/**
- * Obtiene todas las simulaciones, ordenadas por fecha desc.
- * @returns {Array} Lista de simulaciones
- */
 async function obtenerSimulaciones() {
-  const q = query(
-    collection(db, COLLECTIONS.SIMULACIONES),
-    orderBy("creadoEn", "desc")
-  );
-  const snap = await getDocs(q);
+  const snap = await db.collection(COLLECTIONS.SIMULACIONES)
+    .orderBy("creadoEn", "desc").get();
   return snapshotToArray(snap);
 }
 
-/**
- * Elimina una simulación por ID.
- * @param {string} id
- */
 async function eliminarSimulacion(id) {
-  await deleteDoc(doc(db, COLLECTIONS.SIMULACIONES, id));
+  await db.collection(COLLECTIONS.SIMULACIONES).doc(id).delete();
 }
 
-
-// ── LOTES DE PRODUCCIÓN ───────────────────────────────────
-
-/**
- * Registra un nuevo lote de producción real.
- * También actualiza las estadísticas del proveedor.
- * @param {Object} lote
- * @returns {string} ID del lote creado
- */
 async function registrarLote(lote) {
-  // Guardar lote
-  const ref = await addDoc(collection(db, COLLECTIONS.LOTES), {
+  const ref = await db.collection(COLLECTIONS.LOTES).add({
     ...lote,
-    creadoEn: serverTimestamp()
+    creadoEn: firebase.firestore.FieldValue.serverTimestamp()
   });
-
-  // Actualizar estadísticas del proveedor
   await actualizarEstadisticasProveedor(lote);
-
   return ref.id;
 }
 
-/**
- * Obtiene todos los lotes, ordenados por fecha desc.
- * @returns {Array}
- */
 async function obtenerLotes() {
-  const q = query(
-    collection(db, COLLECTIONS.LOTES),
-    orderBy("creadoEn", "desc")
-  );
-  const snap = await getDocs(q);
+  const snap = await db.collection(COLLECTIONS.LOTES)
+    .orderBy("creadoEn", "desc").get();
   return snapshotToArray(snap);
 }
 
-/**
- * Obtiene un lote específico por ID.
- * @param {string} id
- * @returns {Object|null}
- */
 async function obtenerLote(id) {
-  const ref = doc(db, COLLECTIONS.LOTES, id);
-  const snap = await getDoc(ref);
-  return snap.exists() ? docToObj(snap) : null;
+  const snap = await db.collection(COLLECTIONS.LOTES).doc(id).get();
+  return snap.exists ? docToObj(snap) : null;
 }
 
-/**
- * Obtiene lotes de un proveedor específico.
- * @param {string} proveedor
- * @returns {Array}
- */
 async function obtenerLotesPorProveedor(proveedor) {
-  const q = query(
-    collection(db, COLLECTIONS.LOTES),
-    where("proveedor", "==", proveedor),
-    orderBy("creadoEn", "desc")
-  );
-  const snap = await getDocs(q);
+  const snap = await db.collection(COLLECTIONS.LOTES)
+    .where("proveedor", "==", proveedor)
+    .orderBy("creadoEn", "desc").get();
   return snapshotToArray(snap);
 }
 
-/**
- * Elimina un lote por ID.
- * @param {string} id
- */
 async function eliminarLote(id) {
-  await deleteDoc(doc(db, COLLECTIONS.LOTES, id));
+  await db.collection(COLLECTIONS.LOTES).doc(id).delete();
 }
 
-
-// ── PROVEEDORES ───────────────────────────────────────────
-
-/**
- * Actualiza (o crea) el documento de estadísticas de un proveedor.
- * Recalcula promedios a partir de todos sus lotes.
- * @param {Object} nuevoLote
- */
 async function actualizarEstadisticasProveedor(nuevoLote) {
   const { proveedor } = nuevoLote;
   if (!proveedor) return;
-
-  // Obtener todos los lotes del proveedor (incluyendo el nuevo, que ya está guardado)
   const lotes = await obtenerLotesPorProveedor(proveedor);
-
   if (!lotes.length) return;
-
-  // Calcular promedios
   const totalLotes = lotes.length;
   const promedios = lotes.reduce((acc, l) => {
     acc.rendimiento += (l.rendimientoReal || 0);
@@ -2180,95 +2080,55 @@ async function actualizarEstadisticasProveedor(nuevoLote) {
     acc.costoRealKgLimpio += (l.costoRealKgLimpio || 0);
     return acc;
   }, { rendimiento: 0, pctMariposa: 0, precioPagado: 0, costoRealKgLimpio: 0 });
-
   const stats = {
-    nombre:              proveedor,
-    totalLotes:          totalLotes,
+    nombre: proveedor,
+    totalLotes,
     rendimientoPromedio: promedios.rendimiento / totalLotes,
     pctMariposaProm:     promedios.pctMariposa / totalLotes,
     precioPagadoProm:    promedios.precioPagado / totalLotes,
     costoRealProm:       promedios.costoRealKgLimpio / totalLotes,
     ultimaCompra:        nuevoLote.fecha || null,
-    actualizadoEn:       serverTimestamp()
+    actualizadoEn:       firebase.firestore.FieldValue.serverTimestamp()
   };
-
-  // Usar nombre del proveedor como ID del documento
-  const provRef = doc(db, COLLECTIONS.PROVEEDORES, proveedor.replace(/\s+/g, "_"));
-  await setDoc(provRef, stats, { merge: true });
+  const provId = proveedor.replace(/\s+/g, "_");
+  await db.collection(COLLECTIONS.PROVEEDORES).doc(provId).set(stats, { merge: true });
 }
 
-/**
- * Obtiene todos los proveedores con sus estadísticas.
- * @returns {Array}
- */
 async function obtenerProveedores() {
-  const snap = await getDocs(collection(db, COLLECTIONS.PROVEEDORES));
+  const snap = await db.collection(COLLECTIONS.PROVEEDORES).get();
   return snapshotToArray(snap);
 }
 
-/**
- * Obtiene un proveedor por nombre.
- * @param {string} nombre
- * @returns {Object|null}
- */
 async function obtenerProveedor(nombre) {
   const id = nombre.replace(/\s+/g, "_");
-  const ref = doc(db, COLLECTIONS.PROVEEDORES, id);
-  const snap = await getDoc(ref);
-  return snap.exists() ? docToObj(snap) : null;
+  const snap = await db.collection(COLLECTIONS.PROVEEDORES).doc(id).get();
+  return snap.exists ? docToObj(snap) : null;
 }
 
-/**
- * Suscripción en tiempo real a la lista de proveedores.
- * @param {Function} callback - Se llama cada vez que cambia la colección
- * @returns {Function} Función para cancelar la suscripción
- */
 function suscribirProveedores(callback) {
-  return onSnapshot(collection(db, COLLECTIONS.PROVEEDORES), (snap) => {
+  return db.collection(COLLECTIONS.PROVEEDORES).onSnapshot(snap => {
     callback(snapshotToArray(snap));
   });
 }
 
-
-// ── CONFIGURACIÓN GLOBAL ──────────────────────────────────
-
-/**
- * Guarda (o sobreescribe) la configuración global de la empresa.
- * @param {Object} config
- */
 async function guardarConfig(config) {
-  await setDoc(doc(db, COLLECTIONS.CONFIG, "empresa"), {
+  await db.collection(COLLECTIONS.CONFIG).doc("empresa").set({
     ...config,
-    actualizadoEn: serverTimestamp()
+    actualizadoEn: firebase.firestore.FieldValue.serverTimestamp()
   });
 }
 
-/**
- * Obtiene la configuración global.
- * @returns {Object|null}
- */
 async function obtenerConfig() {
-  const ref = doc(db, COLLECTIONS.CONFIG, "empresa");
-  const snap = await getDoc(ref);
-  return snap.exists() ? snap.data() : null;
+  const snap = await db.collection(COLLECTIONS.CONFIG).doc("empresa").get();
+  return snap.exists ? snap.data() : null;
 }
 
-
-// ── EXPORTACIÓN ───────────────────────────────────────────
-
-/**
- * Retorna todos los datos necesarios para exportar a Excel/CSV.
- * @returns {Object} { lotes, proveedores, simulaciones }
- */
 async function obtenerDatosExportacion() {
   const [lotes, proveedores, simulaciones] = await Promise.all([
-    obtenerLotes(),
-    obtenerProveedores(),
-    obtenerSimulaciones()
+    obtenerLotes(), obtenerProveedores(), obtenerSimulaciones()
   ]);
   return { lotes, proveedores, simulaciones };
 }
-
 
 // ========== charts.js ==========
 // ============================================================

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NuezPro — Dashboard</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="components.css">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <!-- SheetJS para exportar Excel -->
@@ -233,12 +233,12 @@
 
 <!-- Scripts -->
 <script type="module">
-  import { initChartDefaults, crearGraficoRentabilidad } from "./js/charts.js";
-  import { obtenerLotes, obtenerProveedores }             from "./js/db.js";
-  import { exportarExcel }                               from "./js/export.js";
+  import { initChartDefaults, crearGraficoRentabilidad } from "./charts.js";
+  import { obtenerLotes, obtenerProveedores }             from "./db.js";
+  import { exportarExcel }                               from "./export.js";
   import {
     formatCurrency, formatPct, formatKg, formatNum, showToast
-  } from "./js/utils.js";
+  } from "./utils.js";
 
   // ── Fecha en topbar ──────────────────────────────
   document.getElementById("topbar-date").textContent =

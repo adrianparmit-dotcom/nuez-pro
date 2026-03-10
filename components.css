@@ -1,0 +1,546 @@
+/* ============================================================
+   NUEZ PRO — components.css
+   Componentes específicos de la app
+   ============================================================ */
+
+/* ── Colores por variedad de nuez ───────────────────────── */
+:root {
+  --v1:  #f59e0b;  /* Mariposa Extra Light */
+  --v2:  #d97706;  /* Mariposa Light */
+  --v3:  #92400e;  /* Mariposa Ámbar */
+  --v4:  #3b82f6;  /* Cuartos Extra Light */
+  --v5:  #1d4ed8;  /* Cuartos Light */
+  --v6:  #1e3a8a;  /* Cuartos Ámbar */
+  --v7:  #10b981;  /* Cuartillos Extra Light */
+  --v8:  #059669;  /* Cuartillos Light */
+  --v9:  #064e3b;  /* Cuartillos Ámbar */
+}
+
+/* ── Tabla de variedades (simulador) ────────────────────── */
+.variety-table .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.variety-table tr[data-v="1"] .dot { background: var(--v1); }
+.variety-table tr[data-v="2"] .dot { background: var(--v2); }
+.variety-table tr[data-v="3"] .dot { background: var(--v3); }
+.variety-table tr[data-v="4"] .dot { background: var(--v4); }
+.variety-table tr[data-v="5"] .dot { background: var(--v5); }
+.variety-table tr[data-v="6"] .dot { background: var(--v6); }
+.variety-table tr[data-v="7"] .dot { background: var(--v7); }
+.variety-table tr[data-v="8"] .dot { background: var(--v8); }
+.variety-table tr[data-v="9"] .dot { background: var(--v9); }
+
+.variety-name-cell {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Input de porcentaje con slider integrado ───────────── */
+.pct-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pct-input-group input[type="number"] {
+  width: 70px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 20px;
+}
+
+.pct-total-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.pct-total-indicator.ok    { background: var(--green-dim);  color: var(--green); }
+.pct-total-indicator.over  { background: var(--red-dim);    color: var(--red); }
+.pct-total-indicator.under { background: var(--yellow-dim); color: var(--yellow); }
+
+/* ── Panel de resultados de simulación ──────────────────── */
+.result-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  overflow: hidden;
+}
+
+.result-section-header {
+  background: var(--bg-card);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.result-section-body {
+  padding: 20px;
+}
+
+/* ── Resumen de costos (desglose) ───────────────────────── */
+.cost-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.cost-row:nth-child(odd) {
+  background: var(--bg-hover);
+}
+
+.cost-row .cost-label {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cost-row .cost-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cost-row.total {
+  background: var(--accent-dim);
+  border: 1px solid rgba(200,144,43,0.2);
+}
+
+.cost-row.total .cost-label,
+.cost-row.total .cost-value {
+  color: var(--accent-light);
+  font-weight: 700;
+}
+
+/* ── Gráficos wrappers ──────────────────────────────────── */
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Calculadora inversa ─────────────────────────────────── */
+.calc-inversa-result {
+  text-align: center;
+  padding: 32px;
+}
+
+.calc-inversa-result .big-number {
+  font-family: var(--font-mono);
+  font-size: 56px;
+  font-weight: 600;
+  color: var(--accent-light);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.calc-inversa-result .big-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Timeline de producción ──────────────────────────────── */
+.prod-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prod-event {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.prod-event-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.prod-event-dot.parada { background: var(--red); }
+.prod-event-dot.limpieza { background: var(--yellow); }
+
+.prod-event-body { flex: 1; }
+.prod-event-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.prod-event-desc  { font-size: 11px; color: var(--text-muted); }
+
+/* ── Eficiencia visual ───────────────────────────────────── */
+.efficiency-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.efficiency-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.efficiency-ring svg {
+  width: 80px;
+  height: 80px;
+  transform: rotate(-90deg);
+}
+
+.efficiency-ring .bg-circle {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+
+.efficiency-ring .progress-circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.efficiency-ring .progress-circle.green  { stroke: var(--green); }
+.efficiency-ring .progress-circle.yellow { stroke: var(--yellow); }
+.efficiency-ring .progress-circle.red    { stroke: var(--red); }
+
+.efficiency-ring .ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Tabla de proveedores (comparador) ───────────────────── */
+.provider-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.provider-rank.rank-1 {
+  background: rgba(200,144,43,0.2);
+  color: var(--accent-light);
+  border: 1px solid var(--accent);
+}
+
+.provider-rank.rank-2 {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.provider-rank.rank-3 {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Barra de distribución de variedades ─────────────────── */
+.variety-bar {
+  display: flex;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.variety-bar-segment {
+  height: 100%;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.variety-bar-segment:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(10px);
+  transition: transform 0.2s;
+}
+
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+}
+
+.modal-close:hover { color: var(--text-primary); }
+
+.modal-body {
+  padding: 22px;
+}
+
+.modal-footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Stepper (pasos del simulador) ───────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.step-number {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 7px;
+  white-space: nowrap;
+}
+
+.step.active .step-number {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d0f12;
+}
+
+.step.active .step-label { color: var(--accent-light); }
+
+.step.done .step-number {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.step-connector {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  margin: 0 8px;
+  min-width: 20px;
+}
+
+/* ── Dashboard quick-stats ───────────────────────────────── */
+.dash-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-stat .stat-number {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dash-stat .stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dash-stat .stat-delta {
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+.dash-stat .stat-delta.up   { color: var(--green); }
+.dash-stat .stat-delta.down { color: var(--red); }
+
+/* ── Lote card (listado de lotes) ────────────────────────── */
+.lote-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.lote-card:hover {
+  border-color: var(--border-light);
+  background: var(--bg-hover);
+}
+
+.lote-card .lote-id {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-light);
+}
+
+.lote-card .lote-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.lote-card .lote-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.lote-card .lote-stat-item {
+  text-align: right;
+}
+
+.lote-card .lote-stat-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lote-card .lote-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}

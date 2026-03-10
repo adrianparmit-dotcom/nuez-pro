@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NuezPro — Registro de Producción</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="components.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -305,10 +305,10 @@
 <div id="toast-container"></div>
 
 <script type="module">
-  import { initProduccion } from "./js/produccion.js";
-  import { initChartDefaults } from "./js/charts.js";
-  import { exportarCSV } from "./js/export.js";
-  import { showToast } from "./js/utils.js";
+  import { initProduccion } from "./produccion.js";
+  import { initChartDefaults } from "./charts.js";
+  import { exportarCSV } from "./export.js";
+  import { showToast } from "./utils.js";
 
   initChartDefaults();
   initProduccion();

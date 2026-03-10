@@ -4,8 +4,1398 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NuezPro — Calculadora Inversa</title>
-  <link rel="stylesheet" href="main.css">
-  <link rel="stylesheet" href="components.css">
+  <style>
+/* ============================================================
+   NUEZ PRO — Sistema de Análisis de Rentabilidad
+   main.css — Variables globales, reset, layout base
+   Estética: Industrial / Dashboard de manufactura
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+/* ── Variables de diseño ────────────────────────────────── */
+:root {
+  /* Paleta industrial */
+  --bg-base:        #0d0f12;
+  --bg-surface:     #141720;
+  --bg-card:        #1a1e2a;
+  --bg-input:       #111318;
+  --bg-hover:       #1f2435;
+
+  --border:         #252a38;
+  --border-light:   #2e3447;
+
+  /* Acento nuez / tierra */
+  --accent:         #c8902b;
+  --accent-light:   #e6a83a;
+  --accent-dim:     rgba(200,144,43,0.15);
+
+  /* Semáforo de rentabilidad */
+  --green:          #2ecc71;
+  --green-dim:      rgba(46,204,113,0.12);
+  --yellow:         #f1c40f;
+  --yellow-dim:     rgba(241,196,15,0.12);
+  --red:            #e74c3c;
+  --red-dim:        rgba(231,76,60,0.12);
+
+  /* Tipografía */
+  --text-primary:   #e8eaf0;
+  --text-secondary: #8b92a8;
+  --text-muted:     #4e566b;
+  --text-accent:    #c8902b;
+
+  /* Métricas */
+  --font-mono:      'IBM Plex Mono', monospace;
+  --font-sans:      'IBM Plex Sans', sans-serif;
+
+  --radius-sm:      4px;
+  --radius:         8px;
+  --radius-lg:      12px;
+
+  --shadow:         0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg:      0 8px 48px rgba(0,0,0,0.6);
+
+  --nav-width:      240px;
+  --topbar-height:  60px;
+
+  --transition:     all 0.2s ease;
+}
+
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar personalizada ────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Layout principal ───────────────────────────────────── */
+.app-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── Sidebar / Navegación ───────────────────────────────── */
+.sidebar {
+  width: var(--nav-width);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo .logo-mark {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+
+.sidebar-logo .logo-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  padding: 16px 0;
+  flex: 1;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  padding: 12px 20px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: var(--transition);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.nav-item.active {
+  color: var(--accent-light);
+  background: var(--accent-dim);
+  border-left-color: var(--accent);
+}
+
+.nav-item .nav-icon {
+  font-size: 16px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-footer .version {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ── Contenido principal ────────────────────────────────── */
+.main-content {
+  margin-left: var(--nav-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: var(--topbar-height);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.page-content {
+  padding: 28px;
+  flex: 1;
+}
+
+/* ── Títulos de página ──────────────────────────────────── */
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.page-header p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ── Grid layouts ───────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+/* ── Cards ──────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+}
+
+.card-title-lg {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Métricas KPI ───────────────────────────────────────── */
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+
+.metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.metric-value.large {
+  font-size: 32px;
+}
+
+.metric-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.metric-card.green::before { background: var(--green); }
+.metric-card.yellow::before { background: var(--yellow); }
+.metric-card.red::before { background: var(--red); }
+.metric-card.accent::before { background: var(--accent); }
+
+/* ── Formularios ────────────────────────────────────────── */
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--accent-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 8px 12px;
+  width: 100%;
+  transition: var(--transition);
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+input[type="number"] {
+  font-family: var(--font-mono);
+}
+
+select { cursor: pointer; }
+
+input::placeholder { color: var(--text-muted); }
+
+/* Input con prefijo/sufijo */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix,
+.input-suffix {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.input-prefix { left: 10px; }
+.input-suffix { right: 10px; }
+
+.input-wrapper input {
+  padding-left: 26px;
+}
+
+.input-wrapper.suffix input {
+  padding-right: 40px;
+}
+
+/* ── Botones ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0d0f12;
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(200,144,43,0.3);
+}
+
+.btn-secondary {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.btn-secondary:hover {
+  background: var(--border-light);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+.btn-danger {
+  background: rgba(231,76,60,0.15);
+  color: var(--red);
+  border: 1px solid rgba(231,76,60,0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(231,76,60,0.25);
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.btn-lg {
+  padding: 12px 28px;
+  font-size: 14px;
+}
+
+.btn-full { width: 100%; justify-content: center; }
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Tablas ─────────────────────────────────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead tr {
+  background: var(--bg-surface);
+}
+
+thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+tbody tr:last-child { border-bottom: none; }
+
+tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+tbody td {
+  padding: 10px 14px;
+  color: var(--text-primary);
+}
+
+tbody td.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+tbody td.muted { color: var(--text-muted); }
+
+tfoot tr {
+  background: var(--bg-surface);
+  border-top: 2px solid var(--border-light);
+}
+
+tfoot td {
+  padding: 10px 14px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-light);
+}
+
+/* ── Badges / Chips ──────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.badge-green  { background: var(--green-dim);  color: var(--green); }
+.badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+.badge-red    { background: var(--red-dim);    color: var(--red); }
+.badge-accent { background: var(--accent-dim); color: var(--accent-light); }
+.badge-gray   { background: var(--bg-hover);   color: var(--text-secondary); }
+
+/* ── Alerta de rentabilidad (semáforo grande) ──────────── */
+.rentabilidad-alert {
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid;
+}
+
+.rentabilidad-alert.excelente {
+  background: var(--green-dim);
+  border-color: rgba(46,204,113,0.3);
+}
+
+.rentabilidad-alert.aceptable {
+  background: var(--yellow-dim);
+  border-color: rgba(241,196,15,0.3);
+}
+
+.rentabilidad-alert.no-rentable {
+  background: var(--red-dim);
+  border-color: rgba(231,76,60,0.3);
+}
+
+.alert-icon { font-size: 28px; }
+
+.alert-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.rentabilidad-alert.excelente .alert-title { color: var(--green); }
+.rentabilidad-alert.aceptable .alert-title { color: var(--yellow); }
+.rentabilidad-alert.no-rentable .alert-title { color: var(--red); }
+
+.alert-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ── Dividers ────────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.tab:hover { color: var(--text-primary); }
+
+.tab.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Toast / Notificaciones ──────────────────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  animation: toastIn 0.3s ease forwards;
+}
+
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.info    { border-left: 3px solid var(--accent); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Loading spinner ─────────────────────────────────────── */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Separador con texto ─────────────────────────────────── */
+.divider-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.divider-label::before,
+.divider-label::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Progress bar ─────────────────────────────────────────── */
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+
+.progress-fill.green  { background: var(--green); }
+.progress-fill.yellow { background: var(--yellow); }
+.progress-fill.red    { background: var(--red); }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.empty-state p {
+  font-size: 13px;
+}
+
+/* ── Utilidades ──────────────────────────────────────────── */
+.text-right   { text-align: right; }
+.text-center  { text-align: center; }
+.text-mono    { font-family: var(--font-mono); }
+.text-accent  { color: var(--accent-light); }
+.text-green   { color: var(--green); }
+.text-yellow  { color: var(--yellow); }
+.text-red     { color: var(--red); }
+.text-muted   { color: var(--text-muted); }
+.text-sm      { font-size: 12px; }
+.text-xs      { font-size: 11px; }
+.fw-bold      { font-weight: 700; }
+.mt-4         { margin-top: 4px; }
+.mt-8         { margin-top: 8px; }
+.mt-16        { margin-top: 16px; }
+.mt-24        { margin-top: 24px; }
+.mb-8         { margin-bottom: 8px; }
+.mb-16        { margin-bottom: 16px; }
+.mb-24        { margin-bottom: 24px; }
+.gap-8        { gap: 8px; }
+.flex         { display: flex; }
+.flex-center  { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.hidden       { display: none !important; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  :root { --nav-width: 200px; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  :root { --nav-width: 0px; }
+
+  .sidebar {
+    transform: translateX(-240px);
+    transition: transform 0.3s ease;
+    width: 240px;
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .main-content { margin-left: 0; }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 { grid-template-columns: 1fr; }
+
+  .page-content { padding: 16px; }
+
+  .topbar { padding: 0 16px; }
+
+  .menu-toggle {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+  }
+}
+
+.menu-toggle { display: none; }
+
+/* ============================================================
+   NUEZ PRO — components.css
+   Componentes específicos de la app
+   ============================================================ */
+
+/* ── Colores por variedad de nuez ───────────────────────── */
+:root {
+  --v1:  #f59e0b;  /* Mariposa Extra Light */
+  --v2:  #d97706;  /* Mariposa Light */
+  --v3:  #92400e;  /* Mariposa Ámbar */
+  --v4:  #3b82f6;  /* Cuartos Extra Light */
+  --v5:  #1d4ed8;  /* Cuartos Light */
+  --v6:  #1e3a8a;  /* Cuartos Ámbar */
+  --v7:  #10b981;  /* Cuartillos Extra Light */
+  --v8:  #059669;  /* Cuartillos Light */
+  --v9:  #064e3b;  /* Cuartillos Ámbar */
+}
+
+/* ── Tabla de variedades (simulador) ────────────────────── */
+.variety-table .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.variety-table tr[data-v="1"] .dot { background: var(--v1); }
+.variety-table tr[data-v="2"] .dot { background: var(--v2); }
+.variety-table tr[data-v="3"] .dot { background: var(--v3); }
+.variety-table tr[data-v="4"] .dot { background: var(--v4); }
+.variety-table tr[data-v="5"] .dot { background: var(--v5); }
+.variety-table tr[data-v="6"] .dot { background: var(--v6); }
+.variety-table tr[data-v="7"] .dot { background: var(--v7); }
+.variety-table tr[data-v="8"] .dot { background: var(--v8); }
+.variety-table tr[data-v="9"] .dot { background: var(--v9); }
+
+.variety-name-cell {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Input de porcentaje con slider integrado ───────────── */
+.pct-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pct-input-group input[type="number"] {
+  width: 70px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 20px;
+}
+
+.pct-total-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.pct-total-indicator.ok    { background: var(--green-dim);  color: var(--green); }
+.pct-total-indicator.over  { background: var(--red-dim);    color: var(--red); }
+.pct-total-indicator.under { background: var(--yellow-dim); color: var(--yellow); }
+
+/* ── Panel de resultados de simulación ──────────────────── */
+.result-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  overflow: hidden;
+}
+
+.result-section-header {
+  background: var(--bg-card);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.result-section-body {
+  padding: 20px;
+}
+
+/* ── Resumen de costos (desglose) ───────────────────────── */
+.cost-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.cost-row:nth-child(odd) {
+  background: var(--bg-hover);
+}
+
+.cost-row .cost-label {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cost-row .cost-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cost-row.total {
+  background: var(--accent-dim);
+  border: 1px solid rgba(200,144,43,0.2);
+}
+
+.cost-row.total .cost-label,
+.cost-row.total .cost-value {
+  color: var(--accent-light);
+  font-weight: 700;
+}
+
+/* ── Gráficos wrappers ──────────────────────────────────── */
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Calculadora inversa ─────────────────────────────────── */
+.calc-inversa-result {
+  text-align: center;
+  padding: 32px;
+}
+
+.calc-inversa-result .big-number {
+  font-family: var(--font-mono);
+  font-size: 56px;
+  font-weight: 600;
+  color: var(--accent-light);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.calc-inversa-result .big-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Timeline de producción ──────────────────────────────── */
+.prod-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prod-event {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.prod-event-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.prod-event-dot.parada { background: var(--red); }
+.prod-event-dot.limpieza { background: var(--yellow); }
+
+.prod-event-body { flex: 1; }
+.prod-event-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.prod-event-desc  { font-size: 11px; color: var(--text-muted); }
+
+/* ── Eficiencia visual ───────────────────────────────────── */
+.efficiency-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.efficiency-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.efficiency-ring svg {
+  width: 80px;
+  height: 80px;
+  transform: rotate(-90deg);
+}
+
+.efficiency-ring .bg-circle {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+
+.efficiency-ring .progress-circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.efficiency-ring .progress-circle.green  { stroke: var(--green); }
+.efficiency-ring .progress-circle.yellow { stroke: var(--yellow); }
+.efficiency-ring .progress-circle.red    { stroke: var(--red); }
+
+.efficiency-ring .ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Tabla de proveedores (comparador) ───────────────────── */
+.provider-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.provider-rank.rank-1 {
+  background: rgba(200,144,43,0.2);
+  color: var(--accent-light);
+  border: 1px solid var(--accent);
+}
+
+.provider-rank.rank-2 {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.provider-rank.rank-3 {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Barra de distribución de variedades ─────────────────── */
+.variety-bar {
+  display: flex;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.variety-bar-segment {
+  height: 100%;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.variety-bar-segment:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(10px);
+  transition: transform 0.2s;
+}
+
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+}
+
+.modal-close:hover { color: var(--text-primary); }
+
+.modal-body {
+  padding: 22px;
+}
+
+.modal-footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Stepper (pasos del simulador) ───────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.step-number {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 7px;
+  white-space: nowrap;
+}
+
+.step.active .step-number {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d0f12;
+}
+
+.step.active .step-label { color: var(--accent-light); }
+
+.step.done .step-number {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.step-connector {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  margin: 0 8px;
+  min-width: 20px;
+}
+
+/* ── Dashboard quick-stats ───────────────────────────────── */
+.dash-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-stat .stat-number {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dash-stat .stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dash-stat .stat-delta {
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+.dash-stat .stat-delta.up   { color: var(--green); }
+.dash-stat .stat-delta.down { color: var(--red); }
+
+/* ── Lote card (listado de lotes) ────────────────────────── */
+.lote-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.lote-card:hover {
+  border-color: var(--border-light);
+  background: var(--bg-hover);
+}
+
+.lote-card .lote-id {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-light);
+}
+
+.lote-card .lote-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.lote-card .lote-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.lote-card .lote-stat-item {
+  text-align: right;
+}
+
+.lote-card .lote-stat-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lote-card .lote-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+  </style>
 </head>
 <body>
 
@@ -268,8 +1658,2479 @@
 <div id="toast-container"></div>
 
 <script type="module">
-  import { initCalculadora } from "./calculadora.js";
+
+// ========== firebase-config.js ==========
+// ============================================================
+// firebase-config.js — Configuración de Firebase
+// ⚠️  REEMPLAZAR con las credenciales de tu proyecto Firebase
+// ============================================================
+
+// Importar Firebase (CDN modular v9+)
+// import { initializeApp 
+// import { getFirestore 
+
+/**
+ * Configuración del proyecto Firebase.
+ * Para obtener estos valores:
+ * 1. Ir a https://console.firebase.google.com
+ * 2. Crear proyecto (o usar uno existente)
+ * 3. Configuración del proyecto → Agregar app web
+ * 4. Copiar el objeto firebaseConfig
+ */
+const firebaseConfig = {
+  apiKey:            "AIzaSyA4Ck2SIyuCvSHVR7PaJsLdAnsNCids8RM",
+  authDomain:        "nuez-pro.firebaseapp.com",
+  databaseURL:       "https://nuez-pro-default-rtdb.firebaseio.com",
+  projectId:         "nuez-pro",
+  storageBucket:     "nuez-pro.firebasestorage.app",
+  messagingSenderId: "439083026648",
+  appId:             "1:439083026648:web:517dcb1c8725e67f40efad"
+};
+
+// Inicializar app Firebase
+const app = initializeApp(firebaseConfig);
+
+// Exportar instancia de Firestore
+const db = getFirestore(app);
+
+// Nombres de colecciones
+const COLLECTIONS = {
+  SIMULACIONES: "simulaciones",   // Simulaciones de compra guardadas
+  LOTES:        "lotes",          // Producción real registrada
+  PROVEEDORES:  "proveedores",    // Resumen histórico por proveedor
+  CONFIG:       "config"          // Parámetros globales (precios base, etc.)
+};
+
+
+// ========== utils.js ==========
+// ============================================================
+// utils.js — Utilidades compartidas
+// Formateo, cálculos base, helpers de UI
+// ============================================================
+
+// ── Formateo de números ───────────────────────────────────
+
+/**
+ * Formatea un número como moneda argentina ($ 1.234,56)
+ * @param {number} val
+ * @param {number} decimals
+ * @returns {string}
+ */
+function formatCurrency(val, decimals = 2) {
+  if (val === null || val === undefined || isNaN(val)) return "—";
+  return "$ " + Number(val).toLocaleString("es-AR", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+/**
+ * Formatea un número con separadores de miles.
+ * @param {number} val
+ * @param {number} decimals
+ * @returns {string}
+ */
+function formatNum(val, decimals = 2) {
+  if (val === null || val === undefined || isNaN(val)) return "—";
+  return Number(val).toLocaleString("es-AR", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+/**
+ * Formatea como porcentaje (45,5%)
+ * @param {number} val - valor 0-100
+ * @param {number} decimals
+ * @returns {string}
+ */
+function formatPct(val, decimals = 1) {
+  if (val === null || val === undefined || isNaN(val)) return "—";
+  return Number(val).toFixed(decimals) + "%";
+}
+
+/**
+ * Formatea kg con una decimal (1.234,5 kg)
+ * @param {number} val
+ * @returns {string}
+ */
+function formatKg(val) {
+  return formatNum(val, 1) + " kg";
+}
+
+
+// ── Parseo de inputs ──────────────────────────────────────
+
+/**
+ * Lee el valor numérico de un input por ID.
+ * Retorna 0 si el campo está vacío o el valor es inválido.
+ * @param {string} id
+ * @returns {number}
+ */
+function getNumInput(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const val = parseFloat(el.value);
+  return isNaN(val) ? 0 : val;
+}
+
+/**
+ * Lee el valor de texto de un input por ID.
+ * @param {string} id
+ * @returns {string}
+ */
+function getStrInput(id) {
+  const el = document.getElementById(id);
+  return el ? (el.value || "").trim() : "";
+}
+
+/**
+ * Setea el valor de un elemento por ID.
+ * @param {string} id
+ * @param {string} val
+ */
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+
+// ── Cálculos de producción ────────────────────────────────
+
+/**
+ * Calcula kg de nuez limpia a partir de kg con cáscara y rendimiento %.
+ * @param {number} kgCascara
+ * @param {number} rendimientoPct - ej: 40
+ * @returns {number}
+ */
+function calcKgLimpio(kgCascara, rendimientoPct) {
+  return kgCascara * (rendimientoPct / 100);
+}
+
+/**
+ * Calcula los kg por variedad dado el kg limpio total y el % de cada variedad.
+ * @param {number} kgLimpio
+ * @param {Object} porcentajes - { v1: 15, v2: 10, ... }
+ * @returns {Object} - { v1: 45.3, v2: ... }
+ */
+function calcKgPorVariedad(kgLimpio, porcentajes) {
+  const resultado = {};
+  for (const [key, pct] of Object.entries(porcentajes)) {
+    resultado[key] = kgLimpio * (pct / 100);
+  }
+  return resultado;
+}
+
+/**
+ * Calcula la facturación por variedad.
+ * @param {Object} kgVariedad
+ * @param {Object} precios
+ * @returns {Object}
+ */
+function calcFacturacionVariedad(kgVariedad, precios) {
+  const resultado = {};
+  for (const [key, kg] of Object.entries(kgVariedad)) {
+    resultado[key] = kg * (precios[key] || 0);
+  }
+  return resultado;
+}
+
+/**
+ * Suma todos los valores de un objeto.
+ * @param {Object} obj
+ * @returns {number}
+ */
+function sumObj(obj) {
+  return Object.values(obj).reduce((a, b) => a + b, 0);
+}
+
+/**
+ * Calcula precio promedio ponderado del lote.
+ * @param {number} facturacionTotal
+ * @param {number} kgLimpio
+ * @returns {number}
+ */
+function calcPrecioPponderado(facturacionTotal, kgLimpio) {
+  if (!kgLimpio) return 0;
+  return facturacionTotal / kgLimpio;
+}
+
+/**
+ * Calcula costo hora-hombre.
+ * @param {number} sueldosMensuales
+ * @param {number} horasDiarias
+ * @param {number} diasMes
+ * @returns {number} $/hora
+ */
+function calcCostoHH(sueldosMensuales, horasDiarias, diasMes) {
+  const horasMes = horasDiarias * diasMes;
+  if (!horasMes) return 0;
+  return sueldosMensuales / horasMes;
+}
+
+/**
+ * Calcula las horas necesarias para procesar un lote.
+ * @param {number} kgCascara
+ * @param {number} kgMaquinaDia - capacidad de la máquina por día
+ * @param {number} horasDiarias
+ * @returns {number}
+ */
+function calcHorasLote(kgCascara, kgMaquinaDia, horasDiarias) {
+  if (!kgMaquinaDia || !horasDiarias) return 0;
+  const dias = kgCascara / kgMaquinaDia;
+  return dias * horasDiarias;
+}
+
+/**
+ * Calcula el costo de producción del lote.
+ * @param {Object} params
+ * @returns {number}
+ */
+function calcCostoProduccion({ sueldos, horasDiarias, diasMes, operarios, horasLote, cuotaMaquina }) {
+  const costoHH  = calcCostoHH(sueldos, horasDiarias, diasMes);
+  const costoMO  = costoHH * operarios * horasLote;
+
+  // Costo máquina prorrateado: cuota mensual / horas mes * horas lote
+  const horasMes = horasDiarias * diasMes;
+  const costoMaq = horasMes > 0 ? (cuotaMaquina / horasMes) * horasLote : 0;
+
+  return costoMO + costoMaq;
+}
+
+/**
+ * Calcula el costo de packaging.
+ * @param {number} kgLimpio
+ * @param {number} precioBolsa - bolsa 5 kg
+ * @param {number} precioCaja - caja 10 kg
+ * @returns {number} costo total packaging estimado
+ */
+function calcCostoPackaging(kgLimpio, precioBolsa, precioCaja) {
+  // Asumimos mix 50% cajas, 50% bolsas (por defecto)
+  const bolsas = Math.ceil((kgLimpio * 0.5) / 5);
+  const cajas  = Math.ceil((kgLimpio * 0.5) / 10);
+  return (bolsas * precioBolsa) + (cajas * precioCaja);
+}
+
+/**
+ * Calcula el costo total del lote.
+ * @param {Object} componentes
+ * @returns {number}
+ */
+function calcCostoTotal({
+  compraMateriaPrima,   // kg × precio
+  transporte,
+  costoProduccion,
+  packaging,
+  transporteVenta
+}) {
+  return compraMateriaPrima + transporte + costoProduccion + packaging + transporteVenta;
+}
+
+/**
+ * Calcula rentabilidad del lote.
+ * @param {number} facturacion
+ * @param {number} costoTotal
+ * @returns {Object} { ganancia, margenPct, estado }
+ */
+function calcRentabilidad(facturacion, costoTotal) {
+  const ganancia  = facturacion - costoTotal;
+  const margenPct = facturacion > 0 ? (ganancia / facturacion) * 100 : 0;
+
+  let estado;
+  if (margenPct >= 25)      estado = "excelente";
+  else if (margenPct >= 10) estado = "aceptable";
+  else                      estado = "no-rentable";
+
+  return { ganancia, margenPct, estado };
+}
+
+/**
+ * Calculadora inversa: precio máximo a pagar por kg con cáscara.
+ * @param {number} precioVentaProm - precio promedio ponderado esperado
+ * @param {number} margenDeseadoPct - margen deseado (0-100)
+ * @param {number} rendimientoPct - rendimiento esperado del lote
+ * @param {number} costosOperativosPorKgLimpio - resto de costos por kg limpio
+ * @returns {number}
+ */
+function calcPrecioMaximo(precioVentaProm, margenDeseadoPct, rendimientoPct, costosOperativosPorKgLimpio) {
+  // Ingreso neto deseado por kg limpio
+  const ingresoNeto = precioVentaProm * (1 - margenDeseadoPct / 100);
+  // Margen disponible para materia prima por kg limpio
+  const disponibleKgLimpio = ingresoNeto - costosOperativosPorKgLimpio;
+  // Convertir a kg con cáscara usando el rendimiento
+  const rendimiento = rendimientoPct / 100;
+  if (!rendimiento) return 0;
+  return disponibleKgLimpio * rendimiento;
+}
+
+
+// ── Eficiencia de producción ──────────────────────────────
+
+/**
+ * Calcula kg/hora real de un lote.
+ * @param {number} kgProcesados
+ * @param {number} horasEfectivas - horas totales menos tiempos muertos
+ * @returns {number}
+ */
+function calcKgHora(kgProcesados, horasEfectivas) {
+  if (!horasEfectivas) return 0;
+  return kgProcesados / horasEfectivas;
+}
+
+/**
+ * Calcula eficiencia vs capacidad teórica.
+ * @param {number} kgHoraReal
+ * @param {number} kgMaquinaDia
+ * @param {number} horasDiarias
+ * @returns {number} porcentaje 0-100
+ */
+function calcEficiencia(kgHoraReal, kgMaquinaDia, horasDiarias) {
+  const kgHoraTeorico = horasDiarias > 0 ? kgMaquinaDia / horasDiarias : 0;
+  if (!kgHoraTeorico) return 0;
+  return Math.min((kgHoraReal / kgHoraTeorico) * 100, 100);
+}
+
+
+// ── UI helpers ────────────────────────────────────────────
+
+/**
+ * Muestra un toast/notificación.
+ * @param {string} msg
+ * @param {'success'|'error'|'info'} type
+ */
+function showToast(msg, type = "info") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const icons = { success: "✓", error: "✕", info: "ℹ" };
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(20px)";
+    toast.style.transition = "all 0.3s ease";
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+/**
+ * Genera un número de lote único basado en fecha y random.
+ * @returns {string} ej: LOT-240315-4821
+ */
+function generarNumeroLote() {
+  const now = new Date();
+  const fecha = now.toLocaleDateString("es-AR", { year: "2-digit", month: "2-digit", day: "2-digit" })
+    .replace(/\//g, "");
+  const rand = Math.floor(Math.random() * 9000) + 1000;
+  return `LOT-${fecha}-${rand}`;
+}
+
+/**
+ * Formatea una fecha Firestore Timestamp o Date a string legible.
+ * @param {*} fecha - Timestamp o Date
+ * @returns {string}
+ */
+function formatFecha(fecha) {
+  if (!fecha) return "—";
+  const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  return d.toLocaleDateString("es-AR", {
+    day: "2-digit", month: "2-digit", year: "numeric"
+  });
+}
+
+/**
+ * Calcula duración entre dos strings de tiempo HH:MM.
+ * @param {string} inicio - "08:00"
+ * @param {string} fin    - "17:30"
+ * @returns {number} horas decimales
+ */
+function calcHorasEntreTiempos(inicio, fin) {
+  if (!inicio || !fin) return 0;
+  const [h1, m1] = inicio.split(":").map(Number);
+  const [h2, m2] = fin.split(":").map(Number);
+  const minutos = (h2 * 60 + m2) - (h1 * 60 + m1);
+  return minutos / 60;
+}
+
+/**
+ * Lista de variedades con nombre y clave.
+ */
+const VARIEDADES = [
+  { key: "v1", nombre: "Mariposa Extra Light",   grupo: "Mariposa" },
+  { key: "v2", nombre: "Mariposa Light",          grupo: "Mariposa" },
+  { key: "v3", nombre: "Mariposa Ámbar",          grupo: "Mariposa" },
+  { key: "v4", nombre: "Cuartos Extra Light",     grupo: "Cuartos" },
+  { key: "v5", nombre: "Cuartos Light",           grupo: "Cuartos" },
+  { key: "v6", nombre: "Cuartos Ámbar",           grupo: "Cuartos" },
+  { key: "v7", nombre: "Cuartillos Extra Light",  grupo: "Cuartillos" },
+  { key: "v8", nombre: "Cuartillos Light",        grupo: "Cuartillos" },
+  { key: "v9", nombre: "Cuartillos Ámbar",        grupo: "Cuartillos" }
+];
+
+/** Colores asociados a cada variedad (CSS vars values) */
+const COLORES_VARIEDAD = {
+  v1: "#f59e0b", v2: "#d97706", v3: "#92400e",
+  v4: "#3b82f6", v5: "#1d4ed8", v6: "#1e3a8a",
+  v7: "#10b981", v8: "#059669", v9: "#064e3b"
+};
+
+
+// ========== db.js ==========
+// ============================================================
+// db.js — Capa de acceso a datos (Firestore)
+// Centraliza todas las operaciones de lectura/escritura
+// ============================================================
+
+// import {
+  collection, doc, addDoc, setDoc, getDoc,
+  getDocs, updateDoc, deleteDoc,
+  query, where, orderBy, limit,
+  onSnapshot, serverTimestamp
+
+
+// import { db, COLLECTIONS 
+
+// ── Helpers internos ─────────────────────────────────────
+
+/** Convierte un documento Firestore en objeto JS con id incluido */
+const docToObj = (doc) => ({ id: doc.id, ...doc.data() });
+
+/** Convierte QuerySnapshot en array de objetos */
+const snapshotToArray = (snapshot) => snapshot.docs.map(docToObj);
+
+
+// ── SIMULACIONES ─────────────────────────────────────────
+
+/**
+ * Guarda una simulación en Firestore.
+ * @param {Object} simulacion - Datos completos de la simulación
+ * @returns {string} ID del documento creado
+ */
+async function guardarSimulacion(simulacion) {
+  const ref = await addDoc(collection(db, COLLECTIONS.SIMULACIONES), {
+    ...simulacion,
+    creadoEn: serverTimestamp()
+  });
+  return ref.id;
+}
+
+/**
+ * Obtiene todas las simulaciones, ordenadas por fecha desc.
+ * @returns {Array} Lista de simulaciones
+ */
+async function obtenerSimulaciones() {
+  const q = query(
+    collection(db, COLLECTIONS.SIMULACIONES),
+    orderBy("creadoEn", "desc")
+  );
+  const snap = await getDocs(q);
+  return snapshotToArray(snap);
+}
+
+/**
+ * Elimina una simulación por ID.
+ * @param {string} id
+ */
+async function eliminarSimulacion(id) {
+  await deleteDoc(doc(db, COLLECTIONS.SIMULACIONES, id));
+}
+
+
+// ── LOTES DE PRODUCCIÓN ───────────────────────────────────
+
+/**
+ * Registra un nuevo lote de producción real.
+ * También actualiza las estadísticas del proveedor.
+ * @param {Object} lote
+ * @returns {string} ID del lote creado
+ */
+async function registrarLote(lote) {
+  // Guardar lote
+  const ref = await addDoc(collection(db, COLLECTIONS.LOTES), {
+    ...lote,
+    creadoEn: serverTimestamp()
+  });
+
+  // Actualizar estadísticas del proveedor
+  await actualizarEstadisticasProveedor(lote);
+
+  return ref.id;
+}
+
+/**
+ * Obtiene todos los lotes, ordenados por fecha desc.
+ * @returns {Array}
+ */
+async function obtenerLotes() {
+  const q = query(
+    collection(db, COLLECTIONS.LOTES),
+    orderBy("creadoEn", "desc")
+  );
+  const snap = await getDocs(q);
+  return snapshotToArray(snap);
+}
+
+/**
+ * Obtiene un lote específico por ID.
+ * @param {string} id
+ * @returns {Object|null}
+ */
+async function obtenerLote(id) {
+  const ref = doc(db, COLLECTIONS.LOTES, id);
+  const snap = await getDoc(ref);
+  return snap.exists() ? docToObj(snap) : null;
+}
+
+/**
+ * Obtiene lotes de un proveedor específico.
+ * @param {string} proveedor
+ * @returns {Array}
+ */
+async function obtenerLotesPorProveedor(proveedor) {
+  const q = query(
+    collection(db, COLLECTIONS.LOTES),
+    where("proveedor", "==", proveedor),
+    orderBy("creadoEn", "desc")
+  );
+  const snap = await getDocs(q);
+  return snapshotToArray(snap);
+}
+
+/**
+ * Elimina un lote por ID.
+ * @param {string} id
+ */
+async function eliminarLote(id) {
+  await deleteDoc(doc(db, COLLECTIONS.LOTES, id));
+}
+
+
+// ── PROVEEDORES ───────────────────────────────────────────
+
+/**
+ * Actualiza (o crea) el documento de estadísticas de un proveedor.
+ * Recalcula promedios a partir de todos sus lotes.
+ * @param {Object} nuevoLote
+ */
+async function actualizarEstadisticasProveedor(nuevoLote) {
+  const { proveedor } = nuevoLote;
+  if (!proveedor) return;
+
+  // Obtener todos los lotes del proveedor (incluyendo el nuevo, que ya está guardado)
+  const lotes = await obtenerLotesPorProveedor(proveedor);
+
+  if (!lotes.length) return;
+
+  // Calcular promedios
+  const totalLotes = lotes.length;
+  const promedios = lotes.reduce((acc, l) => {
+    acc.rendimiento += (l.rendimientoReal || 0);
+    acc.pctMariposa += (l.pctMariposaTotal || 0);
+    acc.precioPagado += (l.precioCascara || 0);
+    acc.costoRealKgLimpio += (l.costoRealKgLimpio || 0);
+    return acc;
+  }, { rendimiento: 0, pctMariposa: 0, precioPagado: 0, costoRealKgLimpio: 0 });
+
+  const stats = {
+    nombre:              proveedor,
+    totalLotes:          totalLotes,
+    rendimientoPromedio: promedios.rendimiento / totalLotes,
+    pctMariposaProm:     promedios.pctMariposa / totalLotes,
+    precioPagadoProm:    promedios.precioPagado / totalLotes,
+    costoRealProm:       promedios.costoRealKgLimpio / totalLotes,
+    ultimaCompra:        nuevoLote.fecha || null,
+    actualizadoEn:       serverTimestamp()
+  };
+
+  // Usar nombre del proveedor como ID del documento
+  const provRef = doc(db, COLLECTIONS.PROVEEDORES, proveedor.replace(/\s+/g, "_"));
+  await setDoc(provRef, stats, { merge: true });
+}
+
+/**
+ * Obtiene todos los proveedores con sus estadísticas.
+ * @returns {Array}
+ */
+async function obtenerProveedores() {
+  const snap = await getDocs(collection(db, COLLECTIONS.PROVEEDORES));
+  return snapshotToArray(snap);
+}
+
+/**
+ * Obtiene un proveedor por nombre.
+ * @param {string} nombre
+ * @returns {Object|null}
+ */
+async function obtenerProveedor(nombre) {
+  const id = nombre.replace(/\s+/g, "_");
+  const ref = doc(db, COLLECTIONS.PROVEEDORES, id);
+  const snap = await getDoc(ref);
+  return snap.exists() ? docToObj(snap) : null;
+}
+
+/**
+ * Suscripción en tiempo real a la lista de proveedores.
+ * @param {Function} callback - Se llama cada vez que cambia la colección
+ * @returns {Function} Función para cancelar la suscripción
+ */
+function suscribirProveedores(callback) {
+  return onSnapshot(collection(db, COLLECTIONS.PROVEEDORES), (snap) => {
+    callback(snapshotToArray(snap));
+  });
+}
+
+
+// ── CONFIGURACIÓN GLOBAL ──────────────────────────────────
+
+/**
+ * Guarda (o sobreescribe) la configuración global de la empresa.
+ * @param {Object} config
+ */
+async function guardarConfig(config) {
+  await setDoc(doc(db, COLLECTIONS.CONFIG, "empresa"), {
+    ...config,
+    actualizadoEn: serverTimestamp()
+  });
+}
+
+/**
+ * Obtiene la configuración global.
+ * @returns {Object|null}
+ */
+async function obtenerConfig() {
+  const ref = doc(db, COLLECTIONS.CONFIG, "empresa");
+  const snap = await getDoc(ref);
+  return snap.exists() ? snap.data() : null;
+}
+
+
+// ── EXPORTACIÓN ───────────────────────────────────────────
+
+/**
+ * Retorna todos los datos necesarios para exportar a Excel/CSV.
+ * @returns {Object} { lotes, proveedores, simulaciones }
+ */
+async function obtenerDatosExportacion() {
+  const [lotes, proveedores, simulaciones] = await Promise.all([
+    obtenerLotes(),
+    obtenerProveedores(),
+    obtenerSimulaciones()
+  ]);
+  return { lotes, proveedores, simulaciones };
+}
+
+
+// ========== charts.js ==========
+// ============================================================
+// charts.js — Módulo de gráficos con Chart.js
+// Todos los gráficos de la aplicación
+// ============================================================
+
+// import { VARIEDADES, COLORES_VARIEDAD, formatCurrency, formatPct 
+
+// Tema global Chart.js — oscuro
+const CHART_DEFAULTS = {
+  color:    "#8b92a8",
+  font:     { family: "'IBM Plex Mono', monospace", size: 11 }
+};
+
+/** Aplica defaults globales de Chart.js */
+function initChartDefaults() {
+  if (typeof Chart === "undefined") return;
+  Chart.defaults.color           = CHART_DEFAULTS.color;
+  Chart.defaults.font.family     = CHART_DEFAULTS.font.family;
+  Chart.defaults.font.size       = CHART_DEFAULTS.font.size;
+  Chart.defaults.plugins.tooltip.backgroundColor = "#1a1e2a";
+  Chart.defaults.plugins.tooltip.borderColor      = "#252a38";
+  Chart.defaults.plugins.tooltip.borderWidth      = 1;
+  Chart.defaults.plugins.tooltip.padding          = 10;
+  Chart.defaults.plugins.legend.labels.padding    = 16;
+}
+
+/**
+ * Gráfico de dona — Distribución de variedades.
+ * @param {string} canvasId
+ * @param {Object} kgVariedad - { v1: 45, v2: 30, ... }
+ * @returns {Chart}
+ */
+function crearGraficoVariedades(canvasId, kgVariedad) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+
+  // Destruir instancia previa si existe
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+
+  const labels = VARIEDADES.map(v => v.nombre);
+  const data   = VARIEDADES.map(v => kgVariedad[v.key] || 0);
+  const colors = VARIEDADES.map(v => COLORES_VARIEDAD[v.key]);
+
+  return new Chart(canvas, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.map(c => c + "cc"),
+        borderColor:     colors,
+        borderWidth:     1,
+        hoverOffset:     8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "65%",
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            boxWidth: 10,
+            boxHeight: 10,
+            padding: 8,
+            font: { size: 10 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct   = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+              return ` ${ctx.parsed.toFixed(1)} kg (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Gráfico de barras — Facturación por variedad.
+ * @param {string} canvasId
+ * @param {Object} facturacionVariedad - { v1: 1200, v2: 800, ... }
+ * @returns {Chart}
+ */
+function crearGraficoFacturacion(canvasId, facturacionVariedad) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+
+  const labels = VARIEDADES.map(v => v.nombre.split(" ").slice(-2).join(" ")); // nombre corto
+  const data   = VARIEDADES.map(v => facturacionVariedad[v.key] || 0);
+  const colors = VARIEDADES.map(v => COLORES_VARIEDAD[v.key]);
+
+  return new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Facturación ($)",
+        data,
+        backgroundColor: colors.map(c => c + "99"),
+        borderColor:     colors,
+        borderWidth:     1,
+        borderRadius:    4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` $ ${ctx.parsed.y.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: "#252a38" },
+          ticks: { maxRotation: 45, font: { size: 9 } }
+        },
+        y: {
+          grid: { color: "#252a38" },
+          ticks: {
+            callback: (val) => "$ " + (val / 1000).toFixed(0) + "k"
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Gráfico de líneas — Historial de rentabilidad por lote.
+ * @param {string} canvasId
+ * @param {Array} lotes - Array de lotes ordenados por fecha
+ * @returns {Chart}
+ */
+function crearGraficoRentabilidad(canvasId, lotes) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+
+  const labels  = lotes.map(l => l.numeroLote || l.id?.substring(0,8));
+  const margins = lotes.map(l => l.margenPct || 0);
+
+  return new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Margen %",
+        data: margins,
+        borderColor:     "#c8902b",
+        backgroundColor: "rgba(200,144,43,0.1)",
+        borderWidth:     2,
+        pointRadius:     5,
+        pointBackgroundColor: margins.map(m =>
+          m >= 25 ? "#2ecc71" : m >= 10 ? "#f1c40f" : "#e74c3c"
+        ),
+        pointBorderColor: "#0d0f12",
+        pointBorderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` Margen: ${ctx.parsed.y.toFixed(1)}%`
+          }
+        },
+        annotation: {
+          annotations: {
+            lineVerde:  { type: "line", yMin: 25, yMax: 25, borderColor: "#2ecc7155", borderWidth: 1, borderDash: [4,4] },
+            lineAmarillo: { type: "line", yMin: 10, yMax: 10, borderColor: "#f1c40f55", borderWidth: 1, borderDash: [4,4] }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: "#252a38" } },
+        y: {
+          grid: { color: "#252a38" },
+          ticks: { callback: (val) => val + "%" }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Gráfico de barras horizontales — Comparación de proveedores.
+ * @param {string} canvasId
+ * @param {Array} proveedores
+ * @param {string} campo - campo a comparar ('rendimientoPromedio', etc.)
+ * @returns {Chart}
+ */
+function crearGraficoProveedores(canvasId, proveedores, campo = "rendimientoPromedio") {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+
+  const labels = proveedores.map(p => p.nombre);
+  const data   = proveedores.map(p => p[campo] || 0);
+
+  return new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: "rgba(200,144,43,0.4)",
+        borderColor:     "#c8902b",
+        borderWidth:     1,
+        borderRadius:    4
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ${ctx.parsed.x.toFixed(1)}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: "#252a38" } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+/**
+ * Gráfico de eficiencia (gauge simulado con dona).
+ * @param {string} canvasId
+ * @param {number} eficienciaPct - 0 a 100
+ * @returns {Chart}
+ */
+function crearGaugeEficiencia(canvasId, eficienciaPct) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+
+  const color = eficienciaPct >= 80 ? "#2ecc71" :
+                eficienciaPct >= 50 ? "#f1c40f" : "#e74c3c";
+
+  return new Chart(canvas, {
+    type: "doughnut",
+    data: {
+      datasets: [{
+        data: [eficienciaPct, 100 - eficienciaPct],
+        backgroundColor: [color + "cc", "#1a1e2a"],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "75%",
+      rotation: -90,
+      circumference: 180,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      }
+    }
+  });
+}
+
+
+// ========== export.js ==========
+// ============================================================
+// export.js — Exportación de datos a CSV y Excel (XLSX)
+// Usa SheetJS (xlsx) para generar archivos Excel
+// ============================================================
+
+// import { obtenerDatosExportacion 
+// import { formatCurrency, formatFecha, formatPct, VARIEDADES 
+
+/**
+ * Exporta todos los lotes de producción a Excel (.xlsx).
+ * Genera múltiples hojas: Lotes, Proveedores, Simulaciones.
+ */
+async function exportarExcel() {
+  try {
+    const { lotes, proveedores, simulaciones } = await obtenerDatosExportacion();
+
+    const wb = XLSX.utils.book_new();
+
+    // ── Hoja 1: Lotes de producción ──────────────────────
+    const lotesData = [
+      ["Lote", "Proveedor", "Fecha", "Kg Procesados", "Rend. Real %",
+       "Kg Limpio", "Kg/hora", "Eficiencia %", "Costo Real $/kg limpio",
+       "Facturación", "Costo Total", "Ganancia", "Margen %"]
+    ];
+
+    for (const l of lotes) {
+      lotesData.push([
+        l.numeroLote || l.id,
+        l.proveedor || "",
+        l.fecha || "",
+        l.kgProcesados || 0,
+        l.rendimientoReal || 0,
+        l.kgLimpio || 0,
+        l.kgHora || 0,
+        l.eficiencia || 0,
+        l.costoRealKgLimpio || 0,
+        l.facturacionTotal || 0,
+        l.costoTotal || 0,
+        l.ganancia || 0,
+        l.margenPct || 0
+      ]);
+    }
+
+    const wsLotes = XLSX.utils.aoa_to_sheet(lotesData);
+    _aplicarEstilosHoja(wsLotes, lotesData[0].length);
+    XLSX.utils.book_append_sheet(wb, wsLotes, "Lotes");
+
+    // ── Hoja 2: Proveedores ──────────────────────────────
+    const provData = [
+      ["Proveedor", "Total Lotes", "Rend. Prom. %", "% Mariposa Prom.",
+       "Precio Pagado Prom. $/kg", "Costo Real Prom. $/kg limpio", "Última Compra"]
+    ];
+
+    for (const p of proveedores) {
+      provData.push([
+        p.nombre || "",
+        p.totalLotes || 0,
+        (p.rendimientoPromedio || 0).toFixed(1),
+        (p.pctMariposaProm || 0).toFixed(1),
+        (p.precioPagadoProm || 0).toFixed(2),
+        (p.costoRealProm || 0).toFixed(2),
+        p.ultimaCompra || ""
+      ]);
+    }
+
+    const wsProveedores = XLSX.utils.aoa_to_sheet(provData);
+    _aplicarEstilosHoja(wsProveedores, provData[0].length);
+    XLSX.utils.book_append_sheet(wb, wsProveedores, "Proveedores");
+
+    // ── Hoja 3: Simulaciones ─────────────────────────────
+    const simData = [
+      ["Fecha", "Kg Cáscara", "Precio $/kg", "Rendimiento %",
+       "Facturación", "Costo Total", "Ganancia", "Margen %", "Estado"]
+    ];
+
+    for (const s of simulaciones) {
+      simData.push([
+        formatFecha(s.creadoEn),
+        s.kgCascara || 0,
+        s.precioCascara || 0,
+        s.rendimientoPct || 0,
+        s.facturacionTotal || 0,
+        s.costoTotal || 0,
+        s.ganancia || 0,
+        (s.margenPct || 0).toFixed(1),
+        s.estado || ""
+      ]);
+    }
+
+    const wsSimulaciones = XLSX.utils.aoa_to_sheet(simData);
+    _aplicarEstilosHoja(wsSimulaciones, simData[0].length);
+    XLSX.utils.book_append_sheet(wb, wsSimulaciones, "Simulaciones");
+
+    // ── Descargar archivo ────────────────────────────────
+    const fecha = new Date().toLocaleDateString("es-AR").replace(/\//g, "-");
+    XLSX.writeFile(wb, `NuezPro_Export_${fecha}.xlsx`);
+
+    return true;
+  } catch (error) {
+    console.error("Error al exportar Excel:", error);
+    throw error;
+  }
+}
+
+/**
+ * Exporta lotes como CSV simple.
+ */
+async function exportarCSV() {
+  try {
+    const { lotes } = await obtenerDatosExportacion();
+
+    const headers = [
+      "Lote", "Proveedor", "Fecha", "Kg_Procesados", "Rendimiento_%",
+      "Kg_Limpio", "Facturacion", "Costo_Total", "Ganancia", "Margen_%", "Estado"
+    ];
+
+    const rows = lotes.map(l => [
+      l.numeroLote || l.id,
+      l.proveedor || "",
+      l.fecha || "",
+      l.kgProcesados || 0,
+      l.rendimientoReal || 0,
+      l.kgLimpio || 0,
+      l.facturacionTotal || 0,
+      l.costoTotal || 0,
+      l.ganancia || 0,
+      (l.margenPct || 0).toFixed(1),
+      l.estado || ""
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(_escaparCSV).join(","))
+      .join("\n");
+
+    _descargarArchivo(csv, "NuezPro_Lotes.csv", "text/csv");
+    return true;
+  } catch (error) {
+    console.error("Error al exportar CSV:", error);
+    throw error;
+  }
+}
+
+/**
+ * Exporta simulaciones como CSV.
+ */
+async function exportarSimulacionesCSV() {
+  try {
+    const { simulaciones } = await obtenerDatosExportacion();
+
+    const headers = [
+      "Fecha", "Kg_Cascara", "Precio_kg", "Rendimiento_%",
+      "Facturacion", "Costo_Total", "Ganancia", "Margen_%", "Estado"
+    ];
+
+    const rows = simulaciones.map(s => [
+      formatFecha(s.creadoEn),
+      s.kgCascara || 0,
+      s.precioCascara || 0,
+      s.rendimientoPct || 0,
+      s.facturacionTotal || 0,
+      s.costoTotal || 0,
+      s.ganancia || 0,
+      (s.margenPct || 0).toFixed(1),
+      s.estado || ""
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(_escaparCSV).join(","))
+      .join("\n");
+
+    _descargarArchivo(csv, "NuezPro_Simulaciones.csv", "text/csv");
+    return true;
+  } catch (error) {
+    console.error("Error al exportar simulaciones CSV:", error);
+    throw error;
+  }
+}
+
+// ── Helpers internos ──────────────────────────────────────
+
+/** Escapa un valor para CSV */
+function _escaparCSV(val) {
+  const str = String(val === null || val === undefined ? "" : val);
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+/** Descarga un archivo en el navegador */
+function _descargarArchivo(contenido, nombre, tipo) {
+  const blob = new Blob(["\uFEFF" + contenido], { type: tipo + ";charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href     = url;
+  link.download = nombre;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/** Aplica ancho de columnas básico a una hoja XLSX */
+function _aplicarEstilosHoja(ws, numCols) {
+  const colWidths = [];
+  for (let i = 0; i < numCols; i++) {
+    colWidths.push({ wch: 18 });
+  }
+  ws["!cols"] = colWidths;
+}
+
+
+// ========== calculadora.js ==========
+// ============================================================
+// calculadora.js — Módulo 2: Calculadora Inversa
+// Calcula precio máximo a pagar por kg de nuez con cáscara
+// ============================================================
+
+// import {
+  getNumInput, setEl, formatCurrency, formatPct, showToast
+
+
+// ── Inicialización ────────────────────────────────────────
+function initCalculadora() {
+  document.getElementById("btn-calcular-inv")?.addEventListener("click", calcularInversa);
+
+  // Recalcular al cambiar cualquier input
+  ["precio-venta-prom", "margen-deseado", "rendimiento-calc",
+   "costo-transporte-calc", "costo-produccion-calc",
+   "costo-packaging-calc", "costo-otros-calc"
+  ].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", calcularInversa);
+  });
+}
+
+// ── Cálculo principal ─────────────────────────────────────
+function calcularInversa() {
+  const precioVenta      = getNumInput("precio-venta-prom");
+  const margenDeseado    = getNumInput("margen-deseado");
+  const rendimiento      = getNumInput("rendimiento-calc");
+  const costoTransporte  = getNumInput("costo-transporte-calc");
+  const costoProduccion  = getNumInput("costo-produccion-calc");
+  const costoPackaging   = getNumInput("costo-packaging-calc");
+  const costoOtros       = getNumInput("costo-otros-calc");
+
+  // Validación
+  if (!precioVenta || !margenDeseado || !rendimiento) {
+    return; // no mostrar error, simplemente no calcular
+  }
+
+  if (margenDeseado >= 100) {
+    showToast("El margen deseado no puede ser 100% o mayor.", "error");
+    return;
+  }
+
+  // ── Lógica de cálculo inverso ─────────────────────────
+  //
+  // Precio de venta promedio = PPP ($/kg limpio)
+  // Margen = (Facturación - CostoTotal) / Facturación
+  //
+  // Por cada KG de nuez CON CÁSCARA producimos:
+  //   kg_limpio = rendimiento/100  kg limpios
+  //
+  // Facturación por kg cáscara = PPP * rendimiento/100
+  //
+  // CostoTotal por kg cáscara =
+  //   PrecioKgCascara + (costos_por_kg_limpio * rendimiento/100)
+  //
+  // Margen = (Facturación - CostoTotal) / Facturación
+  // => CostoTotal = Facturación * (1 - margen/100)
+  // => PrecioKgCascara = CostoTotal - (costos_operativos * rend/100)
+
+  const rend             = rendimiento / 100;
+  const facturacionPorKgCasc = precioVenta * rend;
+
+  // Costo total permitido por kg cáscara (dado el margen deseado)
+  const costoTotalPermitidoPorKgCasc = facturacionPorKgCasc * (1 - margenDeseado / 100);
+
+  // Costos operativos ya expresados en $/kg limpio → convertir a $/kg cáscara
+  const costosOpPorKgLimpio = costoTransporte + costoProduccion + costoPackaging + costoOtros;
+  const costosOpPorKgCasc   = costosOpPorKgLimpio * rend;
+
+  // Precio máximo disponible para la materia prima
+  const precioMaximo = costoTotalPermitidoPorKgCasc - costosOpPorKgCasc;
+
+  // ── Cálculos adicionales para el desglose ────────────
+  const costoTotalKgLimpio    = precioVenta * (1 - margenDeseado / 100);
+  const gananciaKgLimpio      = precioVenta - costoTotalKgLimpio;
+  const facturacionTotalRef   = precioVenta * 1000 * rend; // referencia para 1000 kg cáscara
+
+  // ── Renderizar resultado ──────────────────────────────
+  const resultado = document.getElementById("resultado-inverso");
+  if (resultado) resultado.classList.remove("hidden");
+
+  // Número grande
+  const bigNumber = document.getElementById("precio-maximo-display");
+  if (bigNumber) bigNumber.textContent = formatCurrency(precioMaximo);
+
+  // Métricas secundarias
+  setEl("inv-facturacion-kg",  formatCurrency(facturacionPorKgCasc));
+  setEl("inv-costo-op-kg",     formatCurrency(costosOpPorKgCasc));
+  setEl("inv-costo-total-kg",  formatCurrency(costoTotalPermitidoPorKgCasc));
+  setEl("inv-ganancia-kg",     formatCurrency(gananciaKgLimpio));
+
+  // Semáforo de viabilidad
+  const semaforo = document.getElementById("semaforo-inverso");
+  if (semaforo) {
+    if (precioMaximo > 0) {
+      semaforo.className  = "rentabilidad-alert excelente";
+      semaforo.innerHTML  = `
+        <span class="alert-icon">✅</span>
+        <div>
+          <div class="alert-title">PRECIO MÁXIMO: ${formatCurrency(precioMaximo)} / kg</div>
+          <div class="alert-desc">
+            Con este precio y ${rendimiento}% de rendimiento, lográs el margen de ${margenDeseado}% deseado.
+          </div>
+        </div>
+      `;
+    } else {
+      semaforo.className  = "rentabilidad-alert no-rentable";
+      semaforo.innerHTML  = `
+        <span class="alert-icon">🚫</span>
+        <div>
+          <div class="alert-title">INVIABLE CON ESOS PARÁMETROS</div>
+          <div class="alert-desc">
+            Los costos operativos superan el margen posible. Revisá rendimiento, costos o margen deseado.
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Tabla de escenarios: variando rendimiento ±5
+  _renderEscenarios(precioVenta, margenDeseado, rendimiento, costosOpPorKgLimpio);
+}
+
+// ── Tabla de escenarios alternativos ─────────────────────
+function _renderEscenarios(precioVenta, margenDeseado, rendimientoBase, costosOpPorKgLimpio) {
+  const tbody = document.getElementById("tbody-escenarios");
+  if (!tbody) return;
+
+  const escenarios = [
+    rendimientoBase - 10,
+    rendimientoBase - 5,
+    rendimientoBase,
+    rendimientoBase + 5,
+    rendimientoBase + 10
+  ].filter(r => r > 0 && r <= 100);
+
+  tbody.innerHTML = escenarios.map(rend => {
+    const r                   = rend / 100;
+    const facturPorKgCasc     = precioVenta * r;
+    const costoPermitido      = facturPorKgCasc * (1 - margenDeseado / 100);
+    const costosOpKgCasc      = costosOpPorKgLimpio * r;
+    const precioMax           = costoPermitido - costosOpKgCasc;
+    const esBase              = rend === rendimientoBase;
+
+    return `
+      <tr ${esBase ? 'style="background:var(--accent-dim)"' : ""}>
+        <td class="mono ${esBase ? "text-accent fw-bold" : ""}">
+          ${rend.toFixed(0)}% ${esBase ? "← actual" : ""}
+        </td>
+        <td class="mono">${formatCurrency(facturPorKgCasc)}</td>
+        <td class="mono ${precioMax > 0 ? "text-green" : "text-red"} fw-bold">
+          ${precioMax > 0 ? formatCurrency(precioMax) : "Inviable"}
+        </td>
+        <td>
+          <span class="badge ${precioMax > 0 ? "badge-green" : "badge-red"}">
+            ${precioMax > 0 ? "Viable" : "No viable"}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+
+// ========== simulador.js ==========
+// ============================================================
+// simulador.js — Módulo 1: Simulador de Compra
+// Lógica completa de cálculo y renderizado del simulador
+// ============================================================
+
+// import {
+  getNumInput, getStrInput, setEl,
+  calcKgLimpio, calcKgPorVariedad, calcFacturacionVariedad,
+  calcPrecioPponderado, sumObj, calcCostoHH, calcHorasLote,
+  calcCostoProduccion, calcCostoPackaging, calcCostoTotal,
+  calcRentabilidad, formatCurrency, formatKg, formatPct, formatNum,
+  showToast, VARIEDADES, COLORES_VARIEDAD
+
+
+// import {
+  crearGraficoVariedades,
+  crearGraficoFacturacion
+
+
+// import { guardarSimulacion, obtenerSimulaciones, eliminarSimulacion 
+
+// ── Estado local del simulador ────────────────────────────
+let resultadoActual = null;  // Último resultado calculado
+let chartVariedades = null;
+let chartFacturacion = null;
+
+// ── Inicialización ────────────────────────────────────────
+function initSimulador() {
+  // Construir filas de variedades dinámicamente
+  _renderVariedadesTable();
+
+  // Botones principales
+  document.getElementById("btn-calcular")?.addEventListener("click", calcular);
+  document.getElementById("btn-guardar")?.addEventListener("click", guardarResultado);
+  document.getElementById("btn-limpiar")?.addEventListener("click", limpiarFormulario);
+
+  // Recalcular cuando cambia rendimiento (para mostrar kg limpio en tiempo real)
+  document.getElementById("rendimientoPct")?.addEventListener("input", _actualizarKgLimpio);
+  document.getElementById("kgCascara")?.addEventListener("input",      _actualizarKgLimpio);
+
+  // Cargar historial de simulaciones
+  _cargarHistorial();
+
+  // Marcar step 1 como activo
+  _setStep(1);
+}
+
+// ── Render de tabla de variedades ─────────────────────────
+function _renderVariedadesTable() {
+  const tbody = document.getElementById("tbody-variedades");
+  if (!tbody) return;
+
+  tbody.innerHTML = VARIEDADES.map((v, i) => `
+    <tr data-v="${i + 1}" class="variety-table">
+      <td>
+        <div class="variety-name-cell">
+          <span class="dot"></span>
+          ${v.nombre}
+        </div>
+      </td>
+      <td>
+        <div class="pct-input-group">
+          <div class="input-wrapper suffix">
+            <input type="number" id="pct_${v.key}" min="0" max="100" step="0.1"
+                   placeholder="0" oninput="window._simOnPctChange()">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+      </td>
+      <td class="mono" id="kg_${v.key}">—</td>
+      <td>
+        <div class="input-wrapper">
+          <span class="input-prefix">$</span>
+          <input type="number" id="precio_${v.key}" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </td>
+      <td class="mono text-accent" id="fact_${v.key}">—</td>
+    </tr>
+  `).join("");
+
+  // Exponer callback global para onchange en inputs
+  window._simOnPctChange = _onPctChange;
+}
+
+// ── Callback al cambiar porcentajes ──────────────────────
+function _onPctChange() {
+  const total = VARIEDADES.reduce((acc, v) => acc + (getNumInput(`pct_${v.key}`) || 0), 0);
+  const indicator = document.getElementById("pct-total-indicator");
+  if (!indicator) return;
+
+  indicator.textContent = `Σ porcentajes: ${total.toFixed(1)}%`;
+  indicator.className = "pct-total-indicator " +
+    (Math.abs(total - 100) < 0.1 ? "ok" : total > 100 ? "over" : "under");
+
+  // Si hay kg limpio calculado, actualizar kg por variedad en vivo
+  if (resultadoActual?.kgLimpio) {
+    _mostrarKgVariedad(resultadoActual.kgLimpio);
+  }
+}
+
+// ── Actualiza kg limpio en tiempo real ───────────────────
+function _actualizarKgLimpio() {
+  const kgCascara     = getNumInput("kgCascara");
+  const rendimientoPct = getNumInput("rendimientoPct");
+
+  if (kgCascara && rendimientoPct) {
+    const kgLimpio = calcKgLimpio(kgCascara, rendimientoPct);
+    setEl("display-kg-limpio", formatKg(kgLimpio));
+  }
+}
+
+// ── Muestra kg por variedad en la tabla ──────────────────
+function _mostrarKgVariedad(kgLimpio) {
+  VARIEDADES.forEach(v => {
+    const pct = getNumInput(`pct_${v.key}`);
+    const kg  = kgLimpio * (pct / 100);
+    setEl(`kg_${v.key}`, formatKg(kg));
+  });
+}
+
+// ── Función principal de cálculo ─────────────────────────
+function calcular() {
+  // 1. Leer inputs
+  const kgCascara      = getNumInput("kgCascara");
+  const precioCascara  = getNumInput("precioCascara");
+  const transporte     = getNumInput("transporte");
+  const sueldos        = getNumInput("sueldos");
+  const operarios      = getNumInput("operarios");
+  const horasDiarias   = getNumInput("horasDiarias");
+  const cuotaMaquina   = getNumInput("cuotaMaquina");
+  const diasMes        = getNumInput("diasMes");
+  const precioBolsa    = getNumInput("precioBolsa");
+  const precioCaja     = getNumInput("precioCaja");
+  const costoEnvio     = getNumInput("costoEnvio");
+  const kgMaquinaDia   = getNumInput("kgMaquinaDia");
+  const rendimientoPct = getNumInput("rendimientoPct");
+
+  // Validación básica
+  if (!kgCascara || !precioCascara) {
+    showToast("Completá al menos los kg y precio de nuez con cáscara.", "error");
+    return;
+  }
+  if (!rendimientoPct) {
+    showToast("Ingresá el rendimiento estimado del lote.", "error");
+    return;
+  }
+
+  // 2. Kg limpio
+  const kgLimpio = calcKgLimpio(kgCascara, rendimientoPct);
+
+  // 3. Porcentajes y kg por variedad
+  const porcentajes = {};
+  const kgVariedad  = {};
+  VARIEDADES.forEach(v => {
+    porcentajes[v.key] = getNumInput(`pct_${v.key}`);
+    kgVariedad[v.key]  = kgLimpio * (porcentajes[v.key] / 100);
+  });
+
+  // Verificar que los % sumen ~100
+  const sumPct = Object.values(porcentajes).reduce((a, b) => a + b, 0);
+  if (sumPct > 0 && Math.abs(sumPct - 100) > 1) {
+    showToast(`Los porcentajes suman ${sumPct.toFixed(1)}%. Deben sumar 100%.`, "error");
+    return;
+  }
+
+  // 4. Precios y facturación
+  const precios = {};
+  VARIEDADES.forEach(v => { precios[v.key] = getNumInput(`precio_${v.key}`); });
+
+  const facturacionVariedad = calcFacturacionVariedad(kgVariedad, precios);
+  const facturacionTotal    = sumObj(facturacionVariedad);
+  const precioPpond         = calcPrecioPponderado(facturacionTotal, kgLimpio);
+
+  // 5. Costos
+  const compraMP      = kgCascara * precioCascara;
+  const horasLote     = calcHorasLote(kgCascara, kgMaquinaDia, horasDiarias);
+  const costoProduccion = calcCostoProduccion({
+    sueldos, horasDiarias, diasMes, operarios, horasLote, cuotaMaquina
+  });
+  const packaging     = calcCostoPackaging(kgLimpio, precioBolsa, precioCaja);
+  const transporteVenta = (kgLimpio / 5) * costoEnvio; // estimado por bolsa de 5kg
+
+  const costoTotal    = calcCostoTotal({
+    compraMateriaPrima: compraMP,
+    transporte,
+    costoProduccion,
+    packaging,
+    transporteVenta
+  });
+
+  const costoRealKgLimpio = kgLimpio > 0 ? costoTotal / kgLimpio : 0;
+
+  // 6. Rentabilidad
+  const { ganancia, margenPct, estado } = calcRentabilidad(facturacionTotal, costoTotal);
+
+  // 7. Guardar resultado para posible guardado en DB
+  resultadoActual = {
+    kgCascara, precioCascara, transporte, sueldos, operarios,
+    horasDiarias, cuotaMaquina, diasMes, precioBolsa, precioCaja,
+    costoEnvio, kgMaquinaDia, rendimientoPct,
+    kgLimpio, porcentajes, kgVariedad, precios,
+    facturacionVariedad, facturacionTotal, precioPpond,
+    compraMP, horasLote, costoProduccion, packaging, transporteVenta,
+    costoTotal, costoRealKgLimpio,
+    ganancia, margenPct, estado
+  };
+
+  // 8. Renderizar resultados
+  _renderResultados(resultadoActual);
+
+  // 9. Actualizar gráficos
+  _actualizarGraficos(kgVariedad, facturacionVariedad);
+
+  // 10. Actualizar tabla de variedades con facturación
+  VARIEDADES.forEach(v => {
+    setEl(`kg_${v.key}`,   formatKg(kgVariedad[v.key]));
+    setEl(`fact_${v.key}`, formatCurrency(facturacionVariedad[v.key]));
+  });
+
+  // 11. Mostrar panel de resultados
+  document.getElementById("resultados-panel")?.classList.remove("hidden");
+  document.getElementById("resultados-panel")?.scrollIntoView({ behavior: "smooth" });
+
+  _setStep(4);
+  showToast("Simulación calculada correctamente.", "success");
+}
+
+// ── Render del panel de resultados ───────────────────────
+function _renderResultados(r) {
+  // KPIs principales
+  setEl("res-facturacion",      formatCurrency(r.facturacionTotal));
+  setEl("res-costo-total",      formatCurrency(r.costoTotal));
+  setEl("res-ganancia",         formatCurrency(r.ganancia));
+  setEl("res-margen",           formatPct(r.margenPct));
+  setEl("res-kg-limpio",        formatKg(r.kgLimpio));
+  setEl("res-precio-ppond",     formatCurrency(r.precioPpond));
+  setEl("res-costo-kg-limpio",  formatCurrency(r.costoRealKgLimpio));
+  setEl("res-horas-lote",       formatNum(r.horasLote, 1) + " hs");
+
+  // Desglose de costos
+  setEl("desg-compra-mp",       formatCurrency(r.compraMP));
+  setEl("desg-transporte",      formatCurrency(r.transporte));
+  setEl("desg-produccion",      formatCurrency(r.costoProduccion));
+  setEl("desg-packaging",       formatCurrency(r.packaging));
+  setEl("desg-transp-venta",    formatCurrency(r.transporteVenta));
+  setEl("desg-total",           formatCurrency(r.costoTotal));
+
+  // Alerta de rentabilidad
+  const alertEl = document.getElementById("rentabilidad-alert");
+  if (alertEl) {
+    const configs = {
+      "excelente":    { icon: "🟢", title: "¡COMPRA EXCELENTE!", desc: `Margen del ${r.margenPct.toFixed(1)}% — Muy rentable` },
+      "aceptable":    { icon: "🟡", title: "COMPRA ACEPTABLE",   desc: `Margen del ${r.margenPct.toFixed(1)}% — Rentable pero ajustada` },
+      "no-rentable":  { icon: "🔴", title: "COMPRA NO RENTABLE", desc: `Margen del ${r.margenPct.toFixed(1)}% — No conviene comprar` }
+    };
+    const cfg = configs[r.estado];
+    alertEl.className = `rentabilidad-alert ${r.estado}`;
+    alertEl.innerHTML = `
+      <span class="alert-icon">${cfg.icon}</span>
+      <div>
+        <div class="alert-title">${cfg.title}</div>
+        <div class="alert-desc">${cfg.desc}</div>
+      </div>
+    `;
+  }
+
+  // Color del métric de ganancia
+  const gananciaCard = document.getElementById("card-ganancia");
+  if (gananciaCard) {
+    gananciaCard.className = "metric-card " +
+      (r.estado === "excelente" ? "green" : r.estado === "aceptable" ? "yellow" : "red");
+  }
+}
+
+// ── Gráficos ──────────────────────────────────────────────
+function _actualizarGraficos(kgVariedad, facturacionVariedad) {
+  chartVariedades  = crearGraficoVariedades("chart-variedades", kgVariedad);
+  chartFacturacion = crearGraficoFacturacion("chart-facturacion", facturacionVariedad);
+}
+
+// ── Guardar simulación en Firestore ──────────────────────
+async function guardarResultado() {
+  if (!resultadoActual) {
+    showToast("Primero calculá la simulación.", "error");
+    return;
+  }
+
+  try {
+    const btn = document.getElementById("btn-guardar");
+    if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+
+    await guardarSimulacion(resultadoActual);
+    showToast("Simulación guardada en la base de datos.", "success");
+    await _cargarHistorial();
+  } catch (err) {
+    console.error("Error al guardar:", err);
+    showToast("Error al guardar. Verificá la conexión a Firebase.", "error");
+  } finally {
+    const btn = document.getElementById("btn-guardar");
+    if (btn) { btn.disabled = false; btn.textContent = "💾 Guardar simulación"; }
+  }
+}
+
+// ── Historial de simulaciones ────────────────────────────
+async function _cargarHistorial() {
+  const tbody = document.getElementById("tbody-historial");
+  if (!tbody) return;
+
+  try {
+    const sims = await obtenerSimulaciones();
+
+    if (!sims.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:24px">
+        No hay simulaciones guardadas aún.
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = sims.slice(0, 20).map(s => `
+      <tr>
+        <td class="text-muted text-xs">${formatFechaSimple(s.creadoEn)}</td>
+        <td class="mono">${formatKg(s.kgCascara)}</td>
+        <td class="mono">${formatCurrency(s.precioCascara)}</td>
+        <td class="mono">${formatPct(s.rendimientoPct, 0)}</td>
+        <td class="mono text-accent">${formatCurrency(s.facturacionTotal)}</td>
+        <td class="mono">${formatCurrency(s.costoTotal)}</td>
+        <td class="mono ${s.estado === 'excelente' ? 'text-green' : s.estado === 'aceptable' ? 'text-yellow' : 'text-red'}">
+          ${formatPct(s.margenPct)}
+        </td>
+        <td>
+          <span class="badge badge-${s.estado === 'excelente' ? 'green' : s.estado === 'aceptable' ? 'yellow' : 'red'}">
+            ${s.estado === 'excelente' ? 'Excelente' : s.estado === 'aceptable' ? 'Aceptable' : 'No rentable'}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="window._eliminarSim('${s.id}')">🗑</button>
+        </td>
+      </tr>
+    `).join("");
+
+    // Exponer función global para eliminar
+    window._eliminarSim = async (id) => {
+      if (!confirm("¿Eliminar esta simulación?")) return;
+      await eliminarSimulacion(id);
+      showToast("Simulación eliminada.", "info");
+      _cargarHistorial();
+    };
+
+  } catch (err) {
+    console.error("Error al cargar historial:", err);
+    tbody.innerHTML = `<tr><td colspan="8" class="text-muted text-center" style="padding:24px">
+      Error al cargar. Verificá la conexión a Firebase.
+    </td></tr>`;
+  }
+}
+
+// ── Limpiar formulario ────────────────────────────────────
+function limpiarFormulario() {
+  if (!confirm("¿Limpiar todo el formulario?")) return;
+  document.querySelectorAll("#simulador-form input[type='number']").forEach(el => el.value = "");
+  document.getElementById("resultados-panel")?.classList.add("hidden");
+  resultadoActual = null;
+  _setStep(1);
+  showToast("Formulario limpiado.", "info");
+}
+
+// ── Stepper visual ────────────────────────────────────────
+function _setStep(n) {
+  document.querySelectorAll(".step").forEach((el, i) => {
+    el.classList.remove("active", "done");
+    if (i + 1 < n)  el.classList.add("done");
+    if (i + 1 === n) el.classList.add("active");
+  });
+}
+
+// ── Helper fecha simple ───────────────────────────────────
+function formatFechaSimple(ts) {
+  if (!ts) return "—";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"2-digit" });
+}
+
+
+// ========== produccion.js ==========
+// ============================================================
+// produccion.js — Módulo 3: Registro de Producción Real
+// Registro de lotes reales + comparación con teórico
+// ============================================================
+
+// import {
+  getNumInput, getStrInput, setEl,
+  calcKgLimpio, calcKgPorVariedad, calcFacturacionVariedad,
+  sumObj, calcPrecioPponderado, calcRentabilidad,
+  calcKgHora, calcEficiencia, calcHorasEntreTiempos,
+  formatCurrency, formatKg, formatPct, formatNum, formatFecha,
+  showToast, generarNumeroLote, VARIEDADES
+
+
+// import { registrarLote, obtenerLotes, eliminarLote 
+// import { crearGraficoVariedades 
+
+// ── Inicialización ────────────────────────────────────────
+function initProduccion() {
+  // Generar número de lote automático
+  const numLoteEl = document.getElementById("prod-numero-lote");
+  if (numLoteEl && !numLoteEl.value) {
+    numLoteEl.value = generarNumeroLote();
+  }
+
+  // Botón generar nuevo número de lote
+  document.getElementById("btn-nuevo-lote-num")?.addEventListener("click", () => {
+    if (numLoteEl) numLoteEl.value = generarNumeroLote();
+  });
+
+  // Calcular duración en tiempo real
+  ["prod-hora-inicio", "prod-hora-fin"].forEach(id => {
+    document.getElementById(id)?.addEventListener("change", _calcularDuracion);
+  });
+
+  // Recalcular eficiencia al cambiar inputs
+  ["prod-kg-procesados", "prod-tiempo-muerto"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", _calcularEficienciaVivo);
+  });
+
+  // Construir tabla de variedades de producción real
+  _renderVariedadesProduccion();
+
+  // Botones
+  document.getElementById("btn-registrar-lote")?.addEventListener("click", registrarLoteReal);
+  document.getElementById("btn-limpiar-prod")?.addEventListener("click",   limpiarFormProd);
+
+  // Frenadas dinámicas
+  document.getElementById("btn-agregar-frenada")?.addEventListener("click", agregarFrenada);
+
+  // Cargar historial
+  _cargarHistorialLotes();
+}
+
+// ── Render tabla variedades producción ───────────────────
+function _renderVariedadesProduccion() {
+  const tbody = document.getElementById("tbody-variedades-prod");
+  if (!tbody) return;
+
+  tbody.innerHTML = VARIEDADES.map(v => `
+    <tr>
+      <td>${v.nombre}</td>
+      <td>
+        <div class="input-wrapper suffix">
+          <input type="number" id="prod-pct-${v.key}" min="0" max="100" step="0.1"
+                 placeholder="0" oninput="window._prodOnPctChange()">
+          <span class="input-suffix">%</span>
+        </div>
+      </td>
+      <td class="mono" id="prod-kg-${v.key}">—</td>
+      <td>
+        <div class="input-wrapper">
+          <span class="input-prefix">$</span>
+          <input type="number" id="prod-precio-${v.key}" min="0" step="0.01" placeholder="0.00"
+                 oninput="window._prodOnPctChange()">
+        </div>
+      </td>
+      <td class="mono text-accent" id="prod-fact-${v.key}">—</td>
+    </tr>
+  `).join("");
+
+  window._prodOnPctChange = _onProdPctChange;
+}
+
+// ── Callback cambio % variedades ─────────────────────────
+function _onProdPctChange() {
+  const kgLimpio = _getKgLimpioProd();
+  VARIEDADES.forEach(v => {
+    const pct = getNumInput(`prod-pct-${v.key}`);
+    const kg  = kgLimpio * (pct / 100);
+    const precio = getNumInput(`prod-precio-${v.key}`);
+    setEl(`prod-kg-${v.key}`,   formatKg(kg));
+    setEl(`prod-fact-${v.key}`, formatCurrency(kg * precio));
+  });
+}
+
+function _getKgLimpioProd() {
+  const kgProcesados  = getNumInput("prod-kg-procesados");
+  const rendimientoR  = getNumInput("prod-rendimiento-real");
+  return calcKgLimpio(kgProcesados, rendimientoR);
+}
+
+// ── Calcular duración efectiva ────────────────────────────
+function _calcularDuracion() {
+  const inicio    = getStrInput("prod-hora-inicio");
+  const fin       = getStrInput("prod-hora-fin");
+  const horas     = calcHorasEntreTiempos(inicio, fin);
+  const tiempoMuerto = getNumInput("prod-tiempo-muerto") / 60; // minutos → horas
+  const horasEfectivas = Math.max(horas - tiempoMuerto, 0);
+
+  setEl("display-horas-totales",    formatNum(horas, 2) + " hs");
+  setEl("display-horas-efectivas",  formatNum(horasEfectivas, 2) + " hs");
+}
+
+// ── Calcular eficiencia en vivo ────────────────────────────
+function _calcularEficienciaVivo() {
+  const inicio       = getStrInput("prod-hora-inicio");
+  const fin          = getStrInput("prod-hora-fin");
+  const horas        = calcHorasEntreTiempos(inicio, fin);
+  const tiempoMuerto = getNumInput("prod-tiempo-muerto") / 60;
+  const horasEfec    = Math.max(horas - tiempoMuerto, 0);
+  const kgProcesados = getNumInput("prod-kg-procesados");
+  const kgMaquinaDia = getNumInput("prod-cap-teorica");
+  const horasDiarias = getNumInput("prod-horas-turno") || 8;
+
+  if (horasEfec > 0 && kgProcesados > 0) {
+    const kgHoraReal = calcKgHora(kgProcesados, horasEfec);
+    const eficiencia = calcEficiencia(kgHoraReal, kgMaquinaDia, horasDiarias);
+    setEl("display-kg-hora",    formatNum(kgHoraReal, 1) + " kg/hs");
+    setEl("display-eficiencia", formatPct(eficiencia));
+    _actualizarRingEficiencia(eficiencia);
+  }
+}
+
+// ── Ring de eficiencia ────────────────────────────────────
+function _actualizarRingEficiencia(pct) {
+  const circle = document.querySelector(".progress-circle");
+  const text   = document.querySelector(".ring-text");
+  if (!circle || !text) return;
+
+  const circumference = 220;
+  const offset = circumference - (pct / 100) * circumference;
+  circle.style.strokeDashoffset = offset;
+  circle.className = "progress-circle " +
+    (pct >= 80 ? "green" : pct >= 50 ? "yellow" : "red");
+  text.textContent = pct.toFixed(0) + "%";
+}
+
+// ── Gestión de frenadas ───────────────────────────────────
+let contadorFrenadas = 0;
+
+function agregarFrenada() {
+  contadorFrenadas++;
+  const container = document.getElementById("frenadas-container");
+  if (!container) return;
+
+  const frenada = document.createElement("div");
+  frenada.id = `frenada-${contadorFrenadas}`;
+  frenada.className = "card mb-8";
+  frenada.style.padding = "14px";
+  frenada.innerHTML = `
+    <div class="flex-between mb-8">
+      <span class="text-xs text-muted">Frenada #${contadorFrenadas}</span>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('frenada-${contadorFrenadas}').remove()">
+        ✕ Quitar
+      </button>
+    </div>
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr">
+      <div class="form-group">
+        <label>Hora</label>
+        <input type="time" id="frenada-hora-${contadorFrenadas}">
+      </div>
+      <div class="form-group">
+        <label>Duración (min)</label>
+        <input type="number" id="frenada-dur-${contadorFrenadas}" min="0" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Motivo</label>
+        <input type="text" id="frenada-motivo-${contadorFrenadas}" placeholder="ej: atasco, mantenimiento...">
+      </div>
+    </div>
+  `;
+  container.appendChild(frenada);
+}
+
+function _recolectarFrenadas() {
+  const frenadas = [];
+  for (let i = 1; i <= contadorFrenadas; i++) {
+    const el = document.getElementById(`frenada-${i}`);
+    if (!el) continue; // fue eliminada
+    frenadas.push({
+      hora:    document.getElementById(`frenada-hora-${i}`)?.value || "",
+      duracion: parseFloat(document.getElementById(`frenada-dur-${i}`)?.value || 0),
+      motivo:  document.getElementById(`frenada-motivo-${i}`)?.value || ""
+    });
+  }
+  return frenadas;
+}
+
+// ── Registrar lote real ───────────────────────────────────
+async function registrarLoteReal() {
+  // Leer datos generales
+  const numeroLote    = getStrInput("prod-numero-lote");
+  const proveedor     = getStrInput("prod-proveedor");
+  const fecha         = getStrInput("prod-fecha");
+  const kgProcesados  = getNumInput("prod-kg-procesados");
+  const horaInicio    = getStrInput("prod-hora-inicio");
+  const horaFin       = getStrInput("prod-hora-fin");
+  const numOperarios  = getNumInput("prod-operarios");
+  const precioCascara = getNumInput("prod-precio-cascara");
+  const tiempoMuerto  = getNumInput("prod-tiempo-muerto");
+  const capTeorica    = getNumInput("prod-cap-teorica");
+  const horasTurno    = getNumInput("prod-horas-turno") || 8;
+
+  // Rendimiento real
+  const rendimientoReal = getNumInput("prod-rendimiento-real");
+
+  // Validación
+  if (!proveedor || !fecha || !kgProcesados) {
+    showToast("Completá al menos: proveedor, fecha y kg procesados.", "error");
+    return;
+  }
+
+  // Calcular métricas
+  const horas           = calcHorasEntreTiempos(horaInicio, horaFin);
+  const horasEfectivas  = Math.max(horas - (tiempoMuerto / 60), 0);
+  const kgLimpio        = calcKgLimpio(kgProcesados, rendimientoReal);
+  const kgHora          = calcKgHora(kgProcesados, horasEfectivas || horas);
+  const eficiencia      = calcEficiencia(kgHora, capTeorica, horasTurno);
+
+  // Variedades
+  const porcentajes = {};
+  const kgVariedad  = {};
+  const precios     = {};
+  VARIEDADES.forEach(v => {
+    porcentajes[v.key] = getNumInput(`prod-pct-${v.key}`);
+    kgVariedad[v.key]  = kgLimpio * (porcentajes[v.key] / 100);
+    precios[v.key]     = getNumInput(`prod-precio-${v.key}`);
+  });
+
+  const facturacionVariedad = calcFacturacionVariedad(kgVariedad, precios);
+  const facturacionTotal    = sumObj(facturacionVariedad);
+  const precioPpond         = calcPrecioPponderado(facturacionTotal, kgLimpio);
+
+  // % Mariposa total
+  const pctMariposaTotal = (porcentajes.v1 || 0) + (porcentajes.v2 || 0) + (porcentajes.v3 || 0);
+
+  // Rentabilidad básica (solo materia prima + producción)
+  const costoMP = kgProcesados * (precioCascara || 0);
+  const { ganancia, margenPct, estado } = calcRentabilidad(facturacionTotal, costoMP);
+
+  // Frenadas
+  const frenadas = _recolectarFrenadas();
+
+  // Objeto lote completo
+  const lote = {
+    numeroLote, proveedor, fecha,
+    kgProcesados, horaInicio, horaFin, numOperarios, precioCascara,
+    tiempoMuerto, capTeorica, horasTurno,
+    rendimientoReal, kgLimpio,
+    kgHora, eficiencia,
+    porcentajes, kgVariedad, precios,
+    facturacionVariedad, facturacionTotal, precioPpond,
+    pctMariposaTotal,
+    frenadas,
+    ganancia, margenPct, estado,
+    costoRealKgLimpio: kgLimpio > 0 ? costoMP / kgLimpio : 0
+  };
+
+  try {
+    const btn = document.getElementById("btn-registrar-lote");
+    if (btn) { btn.disabled = true; btn.textContent = "Registrando..."; }
+
+    const id = await registrarLote(lote);
+    showToast(`Lote ${numeroLote} registrado exitosamente.`, "success");
+
+    // Mostrar resumen
+    _mostrarResumenLote({ ...lote, id });
+
+    // Nuevo número de lote para el próximo
+    const numLoteEl = document.getElementById("prod-numero-lote");
+    if (numLoteEl) numLoteEl.value = generarNumeroLote();
+
+    // Recargar historial
+    _cargarHistorialLotes();
+
+  } catch (err) {
+    console.error("Error al registrar lote:", err);
+    showToast("Error al registrar. Verificá Firebase.", "error");
+  } finally {
+    const btn = document.getElementById("btn-registrar-lote");
+    if (btn) { btn.disabled = false; btn.textContent = "✅ Registrar lote"; }
+  }
+}
+
+// ── Resumen del lote recién registrado ───────────────────
+function _mostrarResumenLote(lote) {
+  const panel = document.getElementById("resumen-lote");
+  if (!panel) return;
+
+  panel.classList.remove("hidden");
+  panel.innerHTML = `
+    <div class="card-header">
+      <span class="card-title-lg">Lote registrado: <span class="text-accent">${lote.numeroLote}</span></span>
+      <span class="badge badge-${lote.estado === 'excelente' ? 'green' : lote.estado === 'aceptable' ? 'yellow' : 'red'}">
+        ${lote.estado}
+      </span>
+    </div>
+    <div class="grid-4 mt-16">
+      <div class="metric-card">
+        <div class="metric-label">Kg procesados</div>
+        <div class="metric-value">${formatKg(lote.kgProcesados)}</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-label">Rendimiento real</div>
+        <div class="metric-value">${formatPct(lote.rendimientoReal)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Kg/hora</div>
+        <div class="metric-value">${formatNum(lote.kgHora, 1)}</div>
+      </div>
+      <div class="metric-card ${lote.eficiencia >= 80 ? 'green' : lote.eficiencia >= 50 ? 'yellow' : 'red'}">
+        <div class="metric-label">Eficiencia</div>
+        <div class="metric-value">${formatPct(lote.eficiencia)}</div>
+      </div>
+    </div>
+    <div class="grid-3 mt-16">
+      <div>
+        <div class="metric-label">Facturación</div>
+        <div class="text-mono text-accent fw-bold" style="font-size:18px">${formatCurrency(lote.facturacionTotal)}</div>
+      </div>
+      <div>
+        <div class="metric-label">Precio prom. ponderado</div>
+        <div class="text-mono fw-bold" style="font-size:18px">${formatCurrency(lote.precioPpond)}</div>
+      </div>
+      <div>
+        <div class="metric-label">% Mariposa total</div>
+        <div class="text-mono fw-bold" style="font-size:18px">${formatPct(lote.pctMariposaTotal)}</div>
+      </div>
+    </div>
+  `;
+
+  panel.scrollIntoView({ behavior: "smooth" });
+}
+
+// ── Historial de lotes ────────────────────────────────────
+async function _cargarHistorialLotes() {
+  const tbody = document.getElementById("tbody-historial-lotes");
+  if (!tbody) return;
+
+  try {
+    const lotes = await obtenerLotes();
+
+    if (!lotes.length) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted" style="padding:24px">
+        No hay lotes registrados aún.
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = lotes.slice(0, 30).map(l => `
+      <tr>
+        <td class="mono text-accent">${l.numeroLote || l.id?.substring(0,8)}</td>
+        <td>${l.proveedor || "—"}</td>
+        <td class="text-muted text-xs">${l.fecha || "—"}</td>
+        <td class="mono">${formatKg(l.kgProcesados)}</td>
+        <td class="mono">${formatPct(l.rendimientoReal)}</td>
+        <td class="mono">${formatNum(l.kgHora, 1)}</td>
+        <td class="mono ${l.eficiencia >= 80 ? 'text-green' : l.eficiencia >= 50 ? 'text-yellow' : 'text-red'}">
+          ${formatPct(l.eficiencia)}
+        </td>
+        <td class="mono text-accent">${formatCurrency(l.facturacionTotal)}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="window._verLote('${l.id}')">👁</button>
+          <button class="btn btn-ghost btn-sm" onclick="window._eliminarLote('${l.id}')">🗑</button>
+        </td>
+      </tr>
+    `).join("");
+
+    // Exponer funciones globales
+    window._verLote = (id) => {
+      const lote = lotes.find(l => l.id === id);
+      if (lote) _mostrarDetalleLote(lote);
+    };
+
+    window._eliminarLote = async (id) => {
+      if (!confirm("¿Eliminar este lote?")) return;
+      await eliminarLote(id);
+      showToast("Lote eliminado.", "info");
+      _cargarHistorialLotes();
+    };
+
+  } catch (err) {
+    console.error("Error al cargar lotes:", err);
+    tbody.innerHTML = `<tr><td colspan="9" class="text-muted text-center" style="padding:24px">
+      Error al cargar. Verificá Firebase.
+    </td></tr>`;
+  }
+}
+
+// ── Detalle de lote (modal) ───────────────────────────────
+function _mostrarDetalleLote(lote) {
+  const overlay = document.getElementById("modal-lote");
+  if (!overlay) return;
+
+  const body = overlay.querySelector(".modal-body");
+  if (!body) return;
+
+  body.innerHTML = `
+    <div class="grid-2">
+      <div>
+        <div class="metric-label">Número de lote</div>
+        <div class="text-mono text-accent fw-bold">${lote.numeroLote}</div>
+      </div>
+      <div>
+        <div class="metric-label">Proveedor</div>
+        <div class="fw-bold">${lote.proveedor}</div>
+      </div>
+      <div>
+        <div class="metric-label">Fecha</div>
+        <div>${lote.fecha}</div>
+      </div>
+      <div>
+        <div class="metric-label">Kg procesados</div>
+        <div class="text-mono">${formatKg(lote.kgProcesados)}</div>
+      </div>
+      <div>
+        <div class="metric-label">Rendimiento real</div>
+        <div class="text-mono ${lote.rendimientoReal >= 40 ? 'text-green' : 'text-yellow'}">
+          ${formatPct(lote.rendimientoReal)}
+        </div>
+      </div>
+      <div>
+        <div class="metric-label">Kg/hora</div>
+        <div class="text-mono">${formatNum(lote.kgHora, 1)}</div>
+      </div>
+      <div>
+        <div class="metric-label">Eficiencia</div>
+        <div class="text-mono ${lote.eficiencia >= 80 ? 'text-green' : 'text-yellow'}">
+          ${formatPct(lote.eficiencia)}
+        </div>
+      </div>
+      <div>
+        <div class="metric-label">Frenadas</div>
+        <div class="text-mono">${lote.frenadas?.length || 0} paradas</div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="grid-3">
+      <div>
+        <div class="metric-label">Facturación total</div>
+        <div class="text-mono text-accent fw-bold" style="font-size:18px">
+          ${formatCurrency(lote.facturacionTotal)}
+        </div>
+      </div>
+      <div>
+        <div class="metric-label">Precio prom. ponderado</div>
+        <div class="text-mono fw-bold" style="font-size:18px">
+          ${formatCurrency(lote.precioPpond)}
+        </div>
+      </div>
+      <div>
+        <div class="metric-label">% Mariposa</div>
+        <div class="text-mono fw-bold" style="font-size:18px">
+          ${formatPct(lote.pctMariposaTotal)}
+        </div>
+      </div>
+    </div>
+    ${lote.frenadas?.length ? `
+      <hr class="divider">
+      <div class="card-title mt-8 mb-8">Detalle de frenadas</div>
+      ${lote.frenadas.map(f => `
+        <div class="cost-row">
+          <span class="cost-label">🔴 ${f.hora} — ${f.motivo || "Sin motivo"}</span>
+          <span class="cost-value">${f.duracion} min</span>
+        </div>
+      `).join("")}
+    ` : ""}
+  `;
+
+  overlay.classList.add("open");
+}
+
+// ── Limpiar formulario ────────────────────────────────────
+function limpiarFormProd() {
+  if (!confirm("¿Limpiar el formulario de producción?")) return;
+  document.querySelectorAll("#prod-form input").forEach(el => el.value = "");
+  document.getElementById("frenadas-container").innerHTML = "";
+  contadorFrenadas = 0;
+  document.getElementById("resumen-lote")?.classList.add("hidden");
+
+  const numLoteEl = document.getElementById("prod-numero-lote");
+  if (numLoteEl) numLoteEl.value = generarNumeroLote();
+  showToast("Formulario limpiado.", "info");
+}
+
+
+// ========== proveedores.js ==========
+// ============================================================
+// proveedores.js — Módulo 4: Comparador de Proveedores
+// Historial y comparación estadística por proveedor
+// ============================================================
+
+// import {
+  formatCurrency, formatPct, formatNum, formatFecha,
+  showToast, VARIEDADES
+
+
+// import {
+  obtenerProveedores, obtenerLotesPorProveedor, suscribirProveedores
+
+
+// import { crearGraficoProveedores 
+
+// ── Inicialización ────────────────────────────────────────
+function initProveedores() {
+  // Suscripción en tiempo real
+  const unsub = suscribirProveedores(_renderTablaProveedores);
+
+  // Selector de campo para gráfico
+  document.getElementById("select-campo-grafico")?.addEventListener("change", async () => {
+    const proveedores = await obtenerProveedores();
+    _renderGraficoComparacion(proveedores);
+  });
+
+  // Búsqueda de proveedor
+  document.getElementById("btn-ver-proveedor")?.addEventListener("click", verDetalleProveedor);
+
+  // Limpieza al cerrar página (evitar memory leak)
+  window.addEventListener("unload", unsub);
+}
+
+// ── Tabla principal de proveedores ────────────────────────
+function _renderTablaProveedores(proveedores) {
+  const tbody = document.getElementById("tbody-proveedores");
+  if (!tbody) return;
+
+  if (!proveedores.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center text-muted" style="padding:48px">
+          <div class="empty-state">
+            <div class="empty-state-icon">🏭</div>
+            <p>No hay proveedores con datos registrados todavía.<br>
+            Registrá lotes de producción real para ver estadísticas.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Ordenar por rendimiento promedio descendente
+  const ordenados = [...proveedores].sort((a, b) =>
+    (b.rendimientoPromedio || 0) - (a.rendimientoPromedio || 0)
+  );
+
+  tbody.innerHTML = ordenados.map((p, idx) => {
+    const rankClass = idx === 0 ? "rank-1" : idx === 1 ? "rank-2" : "rank-3";
+    const rend      = p.rendimientoPromedio || 0;
+    const rendColor = rend >= 45 ? "text-green" : rend >= 38 ? "text-yellow" : "text-red";
+
+    return `
+      <tr>
+        <td>
+          <div class="flex-center gap-8">
+            <span class="provider-rank ${idx < 3 ? rankClass : 'rank-3'}">${idx + 1}</span>
+            <strong>${p.nombre || p.id}</strong>
+          </div>
+        </td>
+        <td class="text-center mono">${p.totalLotes || 0}</td>
+        <td class="mono ${rendColor} text-center">
+          ${formatPct(rend)}
+        </td>
+        <td class="mono text-center">${formatPct(p.pctMariposaProm)}</td>
+        <td class="mono text-center">${formatCurrency(p.precioPagadoProm)}</td>
+        <td class="mono text-center">${formatCurrency(p.costoRealProm)}</td>
+        <td class="text-muted text-xs text-center">${p.ultimaCompra || "—"}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="window._verDetProv('${p.nombre || p.id}')">
+            Ver detalle
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  // Exponer función global
+  window._verDetProv = (nombre) => _abrirModalProveedor(nombre, proveedores);
+
+  // Actualizar gráfico
+  _renderGraficoComparacion(ordenados);
+
+  // Actualizar tarjetas resumen
+  _renderResumenProveedores(ordenados);
+}
+
+// ── Gráfico de comparación ────────────────────────────────
+function _renderGraficoComparacion(proveedores) {
+  if (!proveedores.length) return;
+
+  const campo = document.getElementById("select-campo-grafico")?.value || "rendimientoPromedio";
+  crearGraficoProveedores("chart-proveedores", proveedores, campo);
+}
+
+// ── Tarjetas resumen ──────────────────────────────────────
+function _renderResumenProveedores(proveedores) {
+  if (!proveedores.length) return;
+
+  // Mejor rendimiento
+  const mejorRend = proveedores.reduce((best, p) =>
+    (p.rendimientoPromedio > (best.rendimientoPromedio || 0)) ? p : best, proveedores[0]);
+
+  // Mejor precio (más bajo)
+  const mejorPrecio = proveedores.reduce((best, p) =>
+    ((p.precioPagadoProm || Infinity) < (best.precioPagadoProm || Infinity)) ? p : best, proveedores[0]);
+
+  // Total lotes
+  const totalLotes = proveedores.reduce((acc, p) => acc + (p.totalLotes || 0), 0);
+
+  const elMejorRend   = document.getElementById("stat-mejor-rend");
+  const elMejorPrecio = document.getElementById("stat-mejor-precio");
+  const elTotalLotes  = document.getElementById("stat-total-lotes");
+  const elTotalProvs  = document.getElementById("stat-total-provs");
+
+  if (elMejorRend)   elMejorRend.textContent   = `${mejorRend.nombre} (${formatPct(mejorRend.rendimientoPromedio)})`;
+  if (elMejorPrecio) elMejorPrecio.textContent = `${mejorPrecio.nombre} (${formatCurrency(mejorPrecio.precioPagadoProm)})`;
+  if (elTotalLotes)  elTotalLotes.textContent  = totalLotes;
+  if (elTotalProvs)  elTotalProvs.textContent  = proveedores.length;
+}
+
+// ── Modal de detalle de proveedor ─────────────────────────
+async function _abrirModalProveedor(nombre, proveedores) {
+  const proveedor = proveedores.find(p => (p.nombre || p.id) === nombre);
+  if (!proveedor) return;
+
+  const overlay = document.getElementById("modal-proveedor");
+  if (!overlay) return;
+
+  const title = overlay.querySelector(".modal-title");
+  const body  = overlay.querySelector(".modal-body");
+  if (!title || !body) return;
+
+  title.textContent = `Proveedor: ${proveedor.nombre}`;
+
+  // Cargar lotes de este proveedor
+  let lotes = [];
+  try {
+    lotes = await obtenerLotesPorProveedor(nombre);
+  } catch (err) {
+    console.error("Error al cargar lotes del proveedor:", err);
+  }
+
+  body.innerHTML = `
+    <!-- Métricas resumen -->
+    <div class="grid-3 mb-16">
+      <div class="metric-card">
+        <div class="metric-label">Rendimiento prom.</div>
+        <div class="metric-value">${formatPct(proveedor.rendimientoPromedio)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">% Mariposa prom.</div>
+        <div class="metric-value">${formatPct(proveedor.pctMariposaProm)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total lotes</div>
+        <div class="metric-value">${proveedor.totalLotes}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Precio pagado prom.</div>
+        <div class="metric-value">${formatCurrency(proveedor.precioPagadoProm)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Costo real prom. $/kg limpio</div>
+        <div class="metric-value">${formatCurrency(proveedor.costoRealProm)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Última compra</div>
+        <div class="metric-value text-sm">${proveedor.ultimaCompra || "—"}</div>
+      </div>
+    </div>
+
+    <!-- Historial de lotes -->
+    <div class="card-title mb-8">Historial de lotes</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Lote</th>
+            <th>Fecha</th>
+            <th>Kg procesados</th>
+            <th>Rend. %</th>
+            <th>Kg/hora</th>
+            <th>Facturación</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${lotes.length ? lotes.map(l => `
+            <tr>
+              <td class="mono text-accent">${l.numeroLote || l.id?.substring(0,8)}</td>
+              <td class="text-muted">${l.fecha || "—"}</td>
+              <td class="mono">${formatNum(l.kgProcesados, 0)} kg</td>
+              <td class="mono ${l.rendimientoReal >= 40 ? 'text-green' : 'text-yellow'}">
+                ${formatPct(l.rendimientoReal)}
+              </td>
+              <td class="mono">${formatNum(l.kgHora, 1)}</td>
+              <td class="mono text-accent">${formatCurrency(l.facturacionTotal)}</td>
+            </tr>
+          `).join("") : `
+            <tr>
+              <td colspan="6" class="text-center text-muted" style="padding:16px">
+                No hay lotes registrados para este proveedor
+              </td>
+            </tr>
+          `}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  overlay.classList.add("open");
+}
+
+// ── Búsqueda manual de proveedor ─────────────────────────
+async function verDetalleProveedor() {
+  const nombre = document.getElementById("input-buscar-prov")?.value?.trim();
+  if (!nombre) {
+    showToast("Ingresá el nombre del proveedor.", "error");
+    return;
+  }
+
+  const proveedores = await obtenerProveedores();
+  const match = proveedores.find(p =>
+    (p.nombre || p.id || "").toLowerCase().includes(nombre.toLowerCase())
+  );
+
+  if (!match) {
+    showToast(`No se encontró el proveedor "${nombre}".`, "error");
+    return;
+  }
+
+  _abrirModalProveedor(match.nombre || match.id, proveedores);
+}
+
+
+// ========== calculadora-inversa.html script ==========
+
+  //   import { initCalculadora 
   initCalculadora();
+
 </script>
 
 </body>
